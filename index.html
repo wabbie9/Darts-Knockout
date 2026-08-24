@@ -95,8 +95,6 @@ Je moet precies 5 halen om Killer te worden. Ga je over 5, dan telt je score ter
 </div>
 
 <div id="throwCard" class="card">
-<div class="phase">Pijl <span id="dartNo">1</span> van 3</div>
-<div id="rules" class="notice"></div>
 <div id="darts" class="dartrow"></div>
 <div id="message" class="notice message"></div>
 </div>
@@ -123,7 +121,6 @@ const turnBox=document.getElementById("turn");
 const phaseBox=document.getElementById("phase");
 const playersBox=document.getElementById("players");
 const dartNo=document.getElementById("dartNo");
-const rules=document.getElementById("rules");
 const dartsBox=document.getElementById("darts");
 const message=document.getElementById("message");
 const throwCard=document.getElementById("throwCard");
@@ -280,7 +277,7 @@ function render(){
 
   turnBox.textContent="🎯 "+current.name+" — "+(3-game.dart)+" pijlen over";
   dartNo.textContent=Math.min(game.dart+1,3);
-  phaseBox.textContent=current.killer?"🔥 KILLER — AANVALSFASE":"EERST EXACT 5 HALEN";
+  phaseBox.textContent=current.killer?"AANVALSFASE":"OPBOUWFASE";
 
   playersBox.innerHTML="";
 
@@ -313,7 +310,7 @@ function render(){
 
     const label=document.createElement("div");
     label.className="counterLabel";
-    label.textContent="Killer-teller";
+    label.textContent="Teller";
 
     const counter=document.createElement("div");
     counter.className="counter";
@@ -339,7 +336,7 @@ function render(){
 
     if(player.bot){
       status.textContent=player.killer
-        ?"BOT • Killer • aanvalsteller "+player.counter+" / 5"
+        ?"BOT • Aanvalsteller "+player.counter+" / 5"
         :"BOT speelt automatisch";
     }else if(!current.killer){
       status.textContent=index===game.current
@@ -349,7 +346,7 @@ function render(){
       if(index===game.current){
         status.textContent="Je kunt jezelf niet aanvallen.";
       }else if(player.killer){
-        status.textContent="Killer • aanvalsteller "+player.counter+" / 5";
+        status.textContent="Aanvalsteller "+player.counter+" / 5";
       }else{
         status.textContent="Teller: "+player.counter+" / 5";
       }
@@ -383,12 +380,6 @@ function render(){
 
     playersBox.appendChild(card);
   });
-
-  if(!current.killer){
-    rules.innerHTML="<b>Word Killer:</b><br>Miss = 0, Single = +1, Double = +2, Triple = +3. Je moet precies <b>5 / 5</b> halen. Ga je over 5, dan telt je score terug.";
-  }else{
-    rules.innerHTML="<b>Je bent Killer:</b><br>Miss = 0 schade, Single = 1 schade, Double = 2 schade, Triple = 3 schade.";
-  }
 
   dartsBox.innerHTML="";
 
@@ -436,7 +427,7 @@ function throwDart(targetIndex,multiplier){
 
     if(result.killer){
       attacker.killer=true;
-      setMessage("🔥 "+attacker.name+" is KILLER met precies 5 / 5!");
+      setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! 🔥");
     }else if(result.bust){
       setMessage(type+" was te veel → terug naar "+attacker.counter+" / 5.");
     }else{
@@ -454,12 +445,8 @@ function throwDart(targetIndex,multiplier){
 
       if(after===0){
         target.counter=0;
-        setMessage("💥 "+type+" op "+target.name+" → 0 / 5! Exact uitgegooid!");
-
-        game.finished=true;
-        throwCard.classList.add("hidden");
-        winBox.classList.remove("hidden");
-        winMessage.textContent="🏆 "+attacker.name+" WINT!";
+        target.killer=false;
+        setMessage("💥 "+type+" op "+target.name+" → 0 / 5. "+target.name+" moet opnieuw opbouwen.");
         render();
         return;
       }
