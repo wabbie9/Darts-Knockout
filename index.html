@@ -294,6 +294,12 @@ function render(){
     title.className="playerName";
     title.textContent=player.name;
 
+    if(player.killer){
+      const flame=document.createElement("span");
+      flame.textContent=" 🔥";
+      title.appendChild(flame);
+    }
+
     if(player.bot){
       const tag=document.createElement("span");
       tag.className="botTag";
@@ -307,41 +313,34 @@ function render(){
 
     const label=document.createElement("div");
     label.className="counterLabel";
-    label.textContent=player.killer?"Status":"Killer-teller";
+    label.textContent="Killer-teller";
 
     const counter=document.createElement("div");
     counter.className="counter";
-    counter.textContent=player.killer?"KILLER 🔥":player.counter+" / 5";
+    counter.textContent=player.counter+" / 5";
 
     card.appendChild(title);
     card.appendChild(number);
     card.appendChild(label);
     card.appendChild(counter);
 
-    if(!player.killer){
-      const progress=document.createElement("div");
-      progress.className="progress";
+    const progress=document.createElement("div");
+    progress.className="progress";
 
-      const fill=document.createElement("div");
-      fill.className="progressFill";
-      fill.style.width=(player.counter/5*100)+"%";
+    const fill=document.createElement("div");
+    fill.className="progressFill";
+    fill.style.width=(player.counter/5*100)+"%";
 
-      progress.appendChild(fill);
-      card.appendChild(progress);
-    }else{
-      const killer=document.createElement("div");
-      killer.className="killer";
-      killer.textContent="🔥 KILLER";
-      card.appendChild(killer);
-    }
+    progress.appendChild(fill);
+    card.appendChild(progress);
 
     const status=document.createElement("div");
     status.className="status";
 
     if(player.bot){
       status.textContent=player.killer
-        ?"BOT is Killer • "+player.lives+" levens"
-        :"BOT speelt automatisch";
+        ?"BOT • Killer • "+player.lives+" / 3 levens"
+        :"BOT speelt automatisch • "+player.lives+" / 3 levens";
     }else if(!current.killer){
       status.textContent=index===game.current
         ?"Dit is jouw nummer."
@@ -350,9 +349,9 @@ function render(){
       if(index===game.current){
         status.textContent="Je kunt jezelf niet aanvallen.";
       }else if(player.killer){
-        status.textContent="Killer • "+player.lives+" levens";
+        status.textContent="Killer • "+player.lives+" / 3 levens";
       }else{
-        status.textContent="Teller: "+player.counter+" / 5";
+        status.textContent="Teller: "+player.counter+" / 5 • "+player.lives+" / 3 levens";
       }
     }
 
@@ -448,16 +447,29 @@ function throwDart(targetIndex,multiplier){
       target.counter=Math.max(0,target.counter-multiplier);
       setMessage("💥 "+type+" op "+target.name+" → "+target.counter+" / 5");
     }else{
-      target.lives=Math.max(0,target.lives-multiplier);
-      setMessage("💥 "+type+" op "+target.name+" → "+target.lives+" levens");
+      const before=target.lives;
+      const after=before-multiplier;
 
-      if(target.lives===0){
+      if(after===0){
+        target.lives=0;
+        setMessage("💥 "+type+" op "+target.name+" → 0 / 3 levens! Exact uitgegooid!");
+
         game.finished=true;
         throwCard.classList.add("hidden");
         winBox.classList.remove("hidden");
         winMessage.textContent="🏆 "+attacker.name+" WINT!";
         render();
         return;
+      }
+
+      if(after<0){
+        // Te veel schade = terugkaatsen vanaf 0.
+        // Bijvoorbeeld: 2 levens - Triple = 1 leven.
+        target.lives=Math.abs(after);
+        setMessage("💥 "+type+" was te veel → "+target.name+" kaatst terug naar "+target.lives+" / 3 levens.");
+      }else{
+        target.lives=after;
+        setMessage("💥 "+type+" op "+target.name+" → "+target.lives+" / 3 levens");
       }
     }
   }
