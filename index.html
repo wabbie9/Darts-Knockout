@@ -339,8 +339,8 @@ function render(){
 
     if(player.bot){
       status.textContent=player.killer
-        ?"BOT • Killer • "+player.lives+" / 3 levens"
-        :"BOT speelt automatisch • "+player.lives+" / 3 levens";
+        ?"BOT • Killer • aanvalsteller "+player.counter+" / 5"
+        :"BOT speelt automatisch";
     }else if(!current.killer){
       status.textContent=index===game.current
         ?"Dit is jouw nummer."
@@ -349,9 +349,9 @@ function render(){
       if(index===game.current){
         status.textContent="Je kunt jezelf niet aanvallen.";
       }else if(player.killer){
-        status.textContent="Killer • "+player.lives+" / 3 levens";
+        status.textContent="Killer • aanvalsteller "+player.counter+" / 5";
       }else{
-        status.textContent="Teller: "+player.counter+" / 5 • "+player.lives+" / 3 levens";
+        status.textContent="Teller: "+player.counter+" / 5";
       }
     }
 
@@ -447,12 +447,14 @@ function throwDart(targetIndex,multiplier){
       target.counter=Math.max(0,target.counter-multiplier);
       setMessage("💥 "+type+" op "+target.name+" → "+target.counter+" / 5");
     }else{
-      const before=target.lives;
+      // Een Killer wordt aangevallen via zijn 5/5-teller.
+      // Bijvoorbeeld: 5/5 - Triple = 2/5.
+      const before=target.counter;
       const after=before-multiplier;
 
       if(after===0){
-        target.lives=0;
-        setMessage("💥 "+type+" op "+target.name+" → 0 / 3 levens! Exact uitgegooid!");
+        target.counter=0;
+        setMessage("💥 "+type+" op "+target.name+" → 0 / 5! Exact uitgegooid!");
 
         game.finished=true;
         throwCard.classList.add("hidden");
@@ -463,13 +465,13 @@ function throwDart(targetIndex,multiplier){
       }
 
       if(after<0){
-        // Te veel schade = terugkaatsen vanaf 0.
-        // Bijvoorbeeld: 2 levens - Triple = 1 leven.
-        target.lives=Math.abs(after);
-        setMessage("💥 "+type+" was te veel → "+target.name+" kaatst terug naar "+target.lives+" / 3 levens.");
+        // Te veel schade: terugkaatsen vanaf 0.
+        // 2/5 - Triple = 1/5, 1/5 - Double = 1/5.
+        target.counter=Math.abs(after);
+        setMessage("💥 "+type+" was te veel → "+target.name+" kaatst terug naar "+target.counter+" / 5.");
       }else{
-        target.lives=after;
-        setMessage("💥 "+type+" op "+target.name+" → "+target.lives+" / 3 levens");
+        target.counter=after;
+        setMessage("💥 "+type+" op "+target.name+" → "+target.counter+" / 5");
       }
     }
   }
