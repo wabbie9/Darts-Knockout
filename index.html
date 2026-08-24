@@ -1,101 +1,37 @@
-Klaar maatje 😎🎯
-
-Ik heb de nieuwe versie gemaakt met:
-
-🤖 BOT / 2 / 3 / 4 spelers
-BOT speelt automatisch
-Tegen BOT zie alleen jij de buttons
-Tegen spelers hebben alle spelers buttons
-Exact 5 = Killer
-Ga je over 5 → teller terug
-Duidelijke 0/5-teller
-Geen hartjes meer
-Werkt op PC én iPhone
-
-Hier is het bestand:
-
-Download de nieuwe index.html
-
-Vervang hiermee je huidige index.html op GitHub. 
-
-index.html
-HTML
-okee hij is opnieuw bijna goed, we moeten naast de single double en triple button ook een miss butten hebben je kan natuurlijk ook mis gooien ,de bot moet dat ook doen hij mag niet te goed zijn en ook niet te slecht
-
-Ja maatje 😎 precies. Dat hoort erbij.
-
-Ik zou MISS als vierde knop toevoegen:
-
-MISS → 0 punten, dus de teller verandert niet.
-Je verliest wel 1 van je 3 pijlen.
-De BOT kan ook MISS gooien.
-De BOT krijgt een redelijke kans om te missen, zodat hij niet perfect speelt maar ook niet constant mist.
-Bij aanvallen geldt MISS ook als 0 schade.
-De BOT blijft dus een beetje menselijk en onvoorspelbaar.
-
-Ik zou de BOT ongeveer zo laten spelen:
-
-regelmatig Single/Double/Triple
-soms MISS
-als hij dicht bij 5 staat probeert hij soms bewust precies 5 te halen
-maar hij maakt ook fouten.
-
-En de knoppen worden dan:
-
-MISS | SINGLE ×1 | DOUBLE ×2 | TRIPLE ×3
-
-Ik kan deze versie meteen voor je aanpassen en weer als index.html geven.
-
-ja
-
-Klaar maatje 😎🎯
-
-De MISS-knop zit er nu bij:
-
-MISS | SINGLE ×1 | DOUBLE ×2 | TRIPLE ×3
-
-En:
-
-MISS = 0 punten
-MISS kost wel gewoon 1 pijl
-De BOT kan ook missen
-De BOT is niet perfect: ongeveer 22% kans op MISS
-Hij probeert soms precies 5 te halen, maar maakt ook fouten
-MISS tijdens een aanval = 0 schade
-
-Hier is de nieuwe index.html:
-
-⬇️ Download de aangepaste index.html
-
-Vervang hiermee je huidige bestand op GitHub. 
-
 <!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090e1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Darts Knockout</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090e1a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .app{max-width:700px;margin:auto;padding:15px 13px 40px}
-h1{margin:5px 0;font-size:30px}.sub{color:#aab6ca;margin-bottom:15px}
+h1{margin:5px 0;font-size:30px}
+.sub{color:#aab6ca;margin-bottom:15px}
 .card{background:#151e31;border:1px solid #2b3853;border-radius:20px;padding:15px;margin:12px 0}
 .phase{color:#fbbf24;font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
-h2{margin:6px 0 12px}label{display:block;color:#aab6ca;font-size:13px;margin-bottom:4px}
+h2{margin:6px 0 12px}
+label{display:block;color:#aab6ca;font-size:13px;margin-bottom:4px}
 input,select{width:100%;padding:12px;border-radius:12px;font-size:16px;background:#0d1424;color:#fff;border:1px solid #34425e}
-button{width:100%;padding:13px;border:0;border-radius:12px;font-size:16px;font-weight:900;background:#f59e0b;color:#111827;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-button:active{transform:scale(.97)}button:disabled{opacity:.28;cursor:not-allowed}
-.startButton{margin-top:12px}.secondary{background:#29364f;color:#fff}
+button{width:100%;padding:13px;border:0;border-radius:12px;font-size:16px;font-weight:900;background:#f59e0b;color:#111827;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.28;cursor:not-allowed}
+.startButton{margin-top:12px}
+.secondary{background:#29364f;color:#fff}
 .setupgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .playerSetup{background:#0d1424;border-radius:13px;padding:10px}
 .turn{background:#f59e0b;color:#111827;border-radius:14px;padding:13px;text-align:center;font-size:19px;font-weight:950;margin:12px 0}
 .players{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .player{background:#0d1424;border-radius:16px;padding:13px;border:2px solid transparent}
 .player.active{border-color:#f59e0b}
-.player.bot{border-color:#34425e}
-.playerName{font-size:18px;font-weight:950}.number{font-size:36px;font-weight:950;margin:2px 0 7px}
+.playerName{font-size:18px;font-weight:950}
+.number{font-size:36px;font-weight:950;margin:2px 0 7px}
 .counterLabel{color:#aab6ca;font-size:12px;text-transform:uppercase;font-weight:800}
 .counter{font-size:30px;font-weight:950;margin:2px 0 6px}
 .progress{height:10px;width:100%;background:#27334a;border-radius:20px;overflow:hidden}
@@ -103,107 +39,128 @@ button:active{transform:scale(.97)}button:disabled{opacity:.28;cursor:not-allowe
 .killer{margin-top:9px;padding:9px;border-radius:10px;background:#14532d;color:#4ade80;font-weight:950;text-align:center}
 .status{color:#aab6ca;font-size:12px;margin-top:8px}
 .targetButtons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
-.targetButtons button{padding:11px 4px;font-size:11px}
-.miss{border:2px solid #64748b!important;background:#475569!important;color:#fff!important}.single{border:2px solid #22c55e}.double{border:2px solid #f59e0b}.triple{border:2px solid #ef4444}
+.targetButtons button{padding:11px 3px;font-size:10px}
+.miss{border:2px solid #64748b!important;background:#475569!important;color:#fff!important}
+.single{border:2px solid #22c55e}
+.double{border:2px solid #f59e0b}
+.triple{border:2px solid #ef4444}
 .notice{background:#0d1424;padding:11px;border-radius:12px;margin-top:10px;line-height:1.4}
-.message{min-height:22px}.dartrow{display:flex;gap:6px;margin-top:10px}
+.message{min-height:22px}
+.dartrow{display:flex;gap:6px;margin-top:10px}
 .dart{flex:1;background:#0d1424;border:1px solid #34425e;border-radius:9px;padding:8px;text-align:center;font-size:11px}
-.hidden{display:none!important}.win{text-align:center;font-size:25px;font-weight:950}
-.botBadge{display:inline-block;margin-left:5px;font-size:12px;color:#aab6ca}
-@media(max-width:500px){.players{grid-template-columns:1fr}.setupgrid{grid-template-columns:1fr}}
+.hidden{display:none!important}
+.win{text-align:center;font-size:25px;font-weight:950}
+.botTag{color:#aab6ca;font-size:12px}
+@media(max-width:500px){
+ .players{grid-template-columns:1fr}
+ .setupgrid{grid-template-columns:1fr}
+ .targetButtons button{font-size:10px}
+}
 </style>
 </head>
+
 <body>
 <div class="app">
+
 <h1>🎯 Darts Knockout</h1>
 <div class="sub">3 pijlen per beurt • Miss • Single ×1 • Double ×2 • Triple ×3</div>
 
 <section id="setup" class="card">
 <div class="phase">Spel instellen</div>
 <h2>Wie spelen er?</h2>
+
 <select id="mode">
-  <option value="bot">🤖 BOT</option>
-  <option value="2">👥 2 spelers</option>
-  <option value="3">👥 3 spelers</option>
-  <option value="4">👥 4 spelers</option>
+<option value="bot">🤖 BOT</option>
+<option value="2">👥 2 spelers</option>
+<option value="3">👥 3 spelers</option>
+<option value="4">👥 4 spelers</option>
 </select>
+
 <div id="setupPlayers" class="setupgrid"></div>
+
 <button id="startButton" class="startButton">Start wedstrijd 🎯</button>
-<div class="notice">Je moet precies 5 halen om Killer te worden. Ga je over 5, dan kaatst je teller terug. Tegen de BOT speelt de BOT automatisch.</div>
+
+<div class="notice">
+Je moet precies 5 halen om Killer te worden. Ga je over 5, dan telt je score terug vanaf 5.
+</div>
 </section>
 
 <section id="game" class="hidden">
+
 <div id="turn" class="turn"></div>
+
 <div class="card">
 <div id="phase" class="phase"></div>
 <div id="players" class="players"></div>
 </div>
+
 <div id="throwCard" class="card">
 <div class="phase">Pijl <span id="dartNo">1</span> van 3</div>
 <div id="rules" class="notice"></div>
 <div id="darts" class="dartrow"></div>
 <div id="message" class="notice message"></div>
 </div>
+
 <div id="win" class="card hidden">
 <div id="winMessage" class="win"></div>
 <button id="newGame" class="secondary">Nieuwe wedstrijd</button>
 </div>
+
 </section>
 </div>
 
 <script>
 "use strict";
 
-let game = null;
+let game=null;
 
-const setup = document.getElementById("setup");
-const gameScreen = document.getElementById("game");
-const modeSelect = document.getElementById("mode");
-const setupPlayers = document.getElementById("setupPlayers");
-const startButton = document.getElementById("startButton");
-const playersBox = document.getElementById("players");
-const turnBox = document.getElementById("turn");
-const phaseBox = document.getElementById("phase");
-const dartNo = document.getElementById("dartNo");
-const rules = document.getElementById("rules");
-const dartsBox = document.getElementById("darts");
-const message = document.getElementById("message");
-const throwCard = document.getElementById("throwCard");
-const winBox = document.getElementById("win");
-const winMessage = document.getElementById("winMessage");
-const newGame = document.getElementById("newGame");
+const setup=document.getElementById("setup");
+const gameScreen=document.getElementById("game");
+const mode=document.getElementById("mode");
+const setupPlayers=document.getElementById("setupPlayers");
+const startButton=document.getElementById("startButton");
+const turnBox=document.getElementById("turn");
+const phaseBox=document.getElementById("phase");
+const playersBox=document.getElementById("players");
+const dartNo=document.getElementById("dartNo");
+const rules=document.getElementById("rules");
+const dartsBox=document.getElementById("darts");
+const message=document.getElementById("message");
+const throwCard=document.getElementById("throwCard");
+const winBox=document.getElementById("win");
+const winMessage=document.getElementById("winMessage");
+const newGame=document.getElementById("newGame");
 
 function drawSetup(){
-  const mode = modeSelect.value;
-  setupPlayers.innerHTML = "";
+  const selected=mode.value;
+  setupPlayers.innerHTML="";
 
-  if(mode === "bot"){
-    setupPlayers.innerHTML = `
-      <div class="playerSetup">
-        <label>Jouw naam</label>
-        <input id="name0" value="Speler 1">
-        <label style="margin-top:8px">Jouw nummer</label>
-        <input id="num0" type="number" min="1" max="20" placeholder="1-20">
-      </div>
-    `;
+  if(selected==="bot"){
+    setupPlayers.innerHTML=
+      '<div class="playerSetup">'+
+      '<label>Jouw naam</label>'+
+      '<input id="name0" value="Speler 1">'+
+      '<label style="margin-top:8px">Jouw nummer</label>'+
+      '<input id="num0" type="number" min="1" max="20" placeholder="1-20">'+
+      '</div>';
     return;
   }
 
-  const amount = Number(mode);
+  const amount=Number(selected);
+
   for(let i=0;i<amount;i++){
     const box=document.createElement("div");
     box.className="playerSetup";
-    box.innerHTML=`
-      <label>Speler ${i+1}</label>
-      <input id="name${i}" value="Speler ${i+1}">
-      <label style="margin-top:8px">Nummer</label>
-      <input id="num${i}" type="number" min="1" max="20" placeholder="1-20">
-    `;
+    box.innerHTML=
+      '<label>Speler '+(i+1)+'</label>'+
+      '<input id="name'+i+'" value="Speler '+(i+1)+'">'+
+      '<label style="margin-top:8px">Nummer</label>'+
+      '<input id="num'+i+'" type="number" min="1" max="20" placeholder="1-20">';
     setupPlayers.appendChild(box);
   }
 }
 
-modeSelect.addEventListener("change", drawSetup);
+mode.addEventListener("change",drawSetup);
 drawSetup();
 
 function randomFreeNumber(used){
@@ -214,82 +171,84 @@ function randomFreeNumber(used){
   return free[Math.floor(Math.random()*free.length)];
 }
 
-startButton.addEventListener("click", startGame);
+startButton.addEventListener("click",startGame);
 
 function startGame(){
-  const mode=modeSelect.value;
+  const selected=mode.value;
   const players=[];
 
-  const humanName=(document.getElementById("name0")?.value.trim()) || "Speler 1";
-  const humanNumber=Number(document.getElementById("num0")?.value);
+  const firstName=(document.getElementById("name0")?.value.trim())||"Speler 1";
+  const firstNumber=Number(document.getElementById("num0")?.value);
 
-  if(humanNumber<1 || humanNumber>20){
-    alert("Kies voor de speler een nummer van 1 t/m 20.");
+  if(firstNumber<1||firstNumber>20){
+    alert("Kies voor iedere speler een nummer van 1 t/m 20.");
     return;
   }
 
   players.push({
-    name:humanName,
-    number:humanNumber,
+    name:firstName,
+    number:firstNumber,
     counter:0,
     killer:false,
     lives:3,
     darts:[],
-    isBot:false
+    bot:false
   });
 
-  if(mode === "bot"){
-    const botNumber=randomFreeNumber([humanNumber]);
+  if(selected==="bot"){
     players.push({
       name:"BOT",
-      number:botNumber,
+      number:randomFreeNumber([firstNumber]),
       counter:0,
       killer:false,
       lives:3,
       darts:[],
-      isBot:true
+      bot:true
     });
   }else{
-    const amount=Number(mode);
-    for(let i=1;i<amount;i++){
-      const name=(document.getElementById("name"+i)?.value.trim()) || "Speler "+(i+1);
-      const number=Number(document.getElementById("num"+i)?.value);
+    const amount=Number(selected);
 
-      if(number<1 || number>20){
+    for(let i=1;i<amount;i++){
+      const playerName=(document.getElementById("name"+i)?.value.trim())||"Speler "+(i+1);
+      const playerNumber=Number(document.getElementById("num"+i)?.value);
+
+      if(playerNumber<1||playerNumber>20){
         alert("Kies voor iedere speler een nummer van 1 t/m 20.");
         return;
       }
 
       players.push({
-        name,
-        number,
+        name:playerName,
+        number:playerNumber,
         counter:0,
         killer:false,
         lives:3,
         darts:[],
-        isBot:false
+        bot:false
       });
     }
   }
 
   const numbers=players.map(p=>p.number);
+
   if(new Set(numbers).size!==numbers.length){
     alert("Iedere speler moet een verschillend nummer hebben.");
     return;
   }
 
   game={
-    players,
+    players:players,
     current:0,
     dart:0,
     finished:false,
-    botMode:mode==="bot"
+    botMode:selected==="bot"
   };
 
   setup.classList.add("hidden");
   gameScreen.classList.remove("hidden");
+
   render();
-  setMessage(game.players[0].name+" begint. Gooi op je eigen nummer.");
+  setMessage(players[0].name+" begint. Gooi op je eigen nummer.");
 }
 
 function currentPlayer(){
@@ -300,62 +259,73 @@ function setMessage(text){
   message.textContent=text;
 }
 
-function throwResult(current, multiplier){
-  const total=current.counter+multiplier;
+function applyOwnThrow(player,value){
+  const total=player.counter+value;
 
-  if(total<=5) return {counter:total, killer:total===5, bust:false};
+  if(total<=5){
+    return {score:total,bust:false,killer:total===5};
+  }
 
-  // "Terug tellen" vanaf 5:
-  // 6 -> 4, 7 -> 3, 8 -> 2, 9 -> 1, 10 -> 0.
-  return {counter:10-total, killer:false, bust:true};
+  return {
+    score:10-total,
+    bust:true,
+    killer:false
+  };
 }
 
 function render(){
-  if(!game) return;
+  if(!game)return;
 
   const current=currentPlayer();
 
-  turnBox.textContent =
-    "🎯 "+current.name+" — "+(3-game.dart)+" pijlen over";
-
+  turnBox.textContent="🎯 "+current.name+" — "+(3-game.dart)+" pijlen over";
   dartNo.textContent=Math.min(game.dart+1,3);
-
-  phaseBox.textContent=current.killer
-    ? "🔥 KILLER — AANVALSFASE"
-    : "EERST EXACT 5 HALEN";
+  phaseBox.textContent=current.killer?"🔥 KILLER — AANVALSFASE":"EERST EXACT 5 HALEN";
 
   playersBox.innerHTML="";
 
   game.players.forEach((player,index)=>{
     const card=document.createElement("div");
     card.className="player";
+
     if(index===game.current) card.classList.add("active");
-    if(player.isBot) card.classList.add("bot");
 
     const title=document.createElement("div");
     title.className="playerName";
-    title.textContent=player.name+(player.isBot ? " 🤖" : "");
+    title.textContent=player.name;
+
+    if(player.bot){
+      const tag=document.createElement("span");
+      tag.className="botTag";
+      tag.textContent=" 🤖";
+      title.appendChild(tag);
+    }
 
     const number=document.createElement("div");
     number.className="number";
     number.textContent="🎯 "+player.number;
 
-    const counterLabel=document.createElement("div");
-    counterLabel.className="counterLabel";
-    counterLabel.textContent=player.killer ? "Status" : "Killer-teller";
+    const label=document.createElement("div");
+    label.className="counterLabel";
+    label.textContent=player.killer?"Status":"Killer-teller";
 
     const counter=document.createElement("div");
     counter.className="counter";
-    counter.textContent=player.killer ? "KILLER 🔥" : player.counter+" / 5";
+    counter.textContent=player.killer?"KILLER 🔥":player.counter+" / 5";
 
-    card.append(title,number,counterLabel,counter);
+    card.appendChild(title);
+    card.appendChild(number);
+    card.appendChild(label);
+    card.appendChild(counter);
 
     if(!player.killer){
       const progress=document.createElement("div");
       progress.className="progress";
+
       const fill=document.createElement("div");
       fill.className="progressFill";
       fill.style.width=(player.counter/5*100)+"%";
+
       progress.appendChild(fill);
       card.appendChild(progress);
     }else{
@@ -368,45 +338,45 @@ function render(){
     const status=document.createElement("div");
     status.className="status";
 
-    if(player.isBot && game.botMode){
+    if(player.bot){
       status.textContent=player.killer
-        ? "BOT is Killer • "+player.lives+" levens"
-        : "BOT speelt automatisch";
+        ?"BOT is Killer • "+player.lives+" levens"
+        :"BOT speelt automatisch";
     }else if(!current.killer){
       status.textContent=index===game.current
-        ? "Dit is jouw nummer."
-        : "Wacht op je beurt.";
+        ?"Dit is jouw nummer."
+        :"Wacht op je beurt.";
     }else{
       if(index===game.current){
         status.textContent="Je kunt jezelf niet aanvallen.";
       }else if(player.killer){
         status.textContent="Killer • "+player.lives+" levens";
       }else{
-        status.textContent="Aanvalteller: "+player.counter+" / 5";
+        status.textContent="Teller: "+player.counter+" / 5";
       }
     }
 
     card.appendChild(status);
 
-    // BOT: helemaal geen worpknoppen.
-    // Mensen: knoppen zichtbaar, maar alleen actief tijdens hun eigen beurt.
-    if(!player.isBot){
+    // De BOT krijgt nooit knoppen.
+    if(!player.bot){
       const buttons=document.createElement("div");
       buttons.className="targetButtons";
 
-      let canUse=false;
-      if(!game.finished && game.dart<3){
+      let enabled=false;
+
+      if(!game.finished&&game.dart<3){
         if(!current.killer){
-          canUse=(index===game.current);
+          enabled=index===game.current;
         }else{
-          canUse=(index!==game.current);
+          enabled=index!==game.current;
         }
       }
 
-      buttons.appendChild(createThrowButton("MISS","miss",index,0,canUse));
-      buttons.appendChild(createThrowButton("SINGLE ×1","single",index,1,canUse));
-      buttons.appendChild(createThrowButton("DOUBLE ×2","double",index,2,canUse));
-      buttons.appendChild(createThrowButton("TRIPLE ×3","triple",index,3,canUse));
+      buttons.appendChild(makeButton("MISS","miss",index,0,enabled));
+      buttons.appendChild(makeButton("SINGLE ×1","single",index,1,enabled));
+      buttons.appendChild(makeButton("DOUBLE ×2","double",index,2,enabled));
+      buttons.appendChild(makeButton("TRIPLE ×3","triple",index,3,enabled));
 
       card.appendChild(buttons);
     }
@@ -415,63 +385,60 @@ function render(){
   });
 
   if(!current.killer){
-    rules.innerHTML =
-      "<b>Word Killer:</b><br>"+
-      "Gooi op je eigen nummer. Miss = 0, Single = +1, Double = +2, Triple = +3. "+
-      "Je moet <b>precies 5 / 5</b> halen. Ga je over 5, dan telt hij terug.";
+    rules.innerHTML="<b>Word Killer:</b><br>Miss = 0, Single = +1, Double = +2, Triple = +3. Je moet precies <b>5 / 5</b> halen. Ga je over 5, dan telt je score terug.";
   }else{
-    rules.innerHTML =
-      "<b>Je bent Killer:</b><br>"+
-      "Val een andere speler aan. Miss = 0 schade, Single = 1 schade, Double = 2 schade, Triple = 3 schade.";
+    rules.innerHTML="<b>Je bent Killer:</b><br>Miss = 0 schade, Single = 1 schade, Double = 2 schade, Triple = 3 schade.";
   }
 
   dartsBox.innerHTML="";
-  current.darts.forEach((throwText,index)=>{
+
+  current.darts.forEach((item,index)=>{
     const dart=document.createElement("div");
     dart.className="dart";
-    dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+throwText;
+    dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+item;
     dartsBox.appendChild(dart);
   });
 }
 
-function createThrowButton(text,cssClass,targetIndex,multiplier,canUse){
+function makeButton(text,css,index,multiplier,enabled){
   const button=document.createElement("button");
   button.textContent=text;
-  button.className=cssClass;
-  button.disabled=!canUse;
+  button.className=css;
+  button.disabled=!enabled;
 
-  button.addEventListener("click",()=>{
-    throwDart(targetIndex,multiplier);
+  button.addEventListener("click",function(){
+    throwDart(index,multiplier);
   });
 
   return button;
 }
 
 function throwDart(targetIndex,multiplier){
-  if(!game || game.finished || game.dart>=3) return;
+  if(!game||game.finished||game.dart>=3)return;
 
   const attacker=currentPlayer();
   const target=game.players[targetIndex];
 
-  if(!attacker.killer && targetIndex!==game.current) return;
-  if(attacker.killer && targetIndex===game.current) return;
+  if(!attacker.killer&&targetIndex!==game.current)return;
+  if(attacker.killer&&targetIndex===game.current)return;
 
   game.dart++;
 
-  const type=multiplier===0 ? "MISS" : multiplier===1 ? "Single" : multiplier===2 ? "Double" : "Triple";
+  const type=multiplier===0?"MISS":multiplier===1?"Single":multiplier===2?"Double":"Triple";
+
   attacker.darts.push(type+" → "+target.name);
 
   if(multiplier===0){
     setMessage("❌ "+attacker.name+" mist — 0 punten.");
   }else if(!attacker.killer){
-    const result=throwResult(attacker,multiplier);
-    attacker.counter=result.counter;
+    const result=applyOwnThrow(attacker,multiplier);
+    attacker.counter=result.score;
 
     if(result.killer){
       attacker.killer=true;
       setMessage("🔥 "+attacker.name+" is KILLER met precies 5 / 5!");
     }else if(result.bust){
-      setMessage(type+" was te veel → teller terug naar "+attacker.counter+" / 5.");
+      setMessage(type+" was te veel → terug naar "+attacker.counter+" / 5.");
     }else{
       setMessage(type+" → "+attacker.counter+" / 5");
     }
@@ -502,7 +469,7 @@ function throwDart(targetIndex,multiplier){
 }
 
 function nextTurn(){
-  if(!game || game.finished) return;
+  if(!game||game.finished)return;
 
   game.current=(game.current+1)%game.players.length;
   game.dart=0;
@@ -511,13 +478,13 @@ function nextTurn(){
   render();
   setMessage(currentPlayer().name+" is aan de beurt. 3 pijlen.");
 
-  if(game.botMode && currentPlayer().isBot){
-    setTimeout(botTurn,700);
+  if(game.botMode&&currentPlayer().bot){
+    setTimeout(botTurn,800);
   }
 }
 
 function botTurn(){
-  if(!game || game.finished || !currentPlayer().isBot) return;
+  if(!game||game.finished||!currentPlayer().bot)return;
 
   if(game.dart>=3){
     nextTurn();
@@ -525,74 +492,50 @@ function botTurn(){
   }
 
   const bot=currentPlayer();
-
   let targetIndex=game.current;
-  let multiplier;
+  let value;
 
-  if(!bot.killer){
+  if(Math.random()<0.22){
+    value=0;
+  }else if(!bot.killer){
+    const needed=5-bot.counter;
+
+    if(needed>=1&&needed<=3&&Math.random()<0.55){
+      value=needed;
+    }else{
+      value=1+Math.floor(Math.random()*3);
+    }
+
     targetIndex=game.current;
-    multiplier=chooseBotThrow(bot);
   }else{
-    const humanIndex=game.players.findIndex(p=>!p.isBot);
-    targetIndex=humanIndex>=0 ? humanIndex : (game.current+1)%game.players.length;
-    multiplier=chooseBotAttack(game.players[targetIndex]);
+    const humanIndex=game.players.findIndex(p=>!p.bot);
+    targetIndex=humanIndex;
+
+    const target=game.players[targetIndex];
+
+    if(target.killer){
+      if(target.lives===1){
+        value=Math.random()<0.65?1:2;
+      }else if(target.lives===2){
+        value=Math.random()<0.65?2:1;
+      }else{
+        value=Math.random()<0.55?2:1;
+      }
+    }else{
+      value=target.counter>=3&&Math.random()<0.55?3:1+Math.floor(Math.random()*3);
+    }
   }
 
-  throwDart(targetIndex,multiplier);
+  throwDart(targetIndex,value);
 
-  if(game && !game.finished && game.current===game.players.findIndex(p=>p.isBot)){
-    if(game.dart<3){
-      setTimeout(botTurn,650);
-    }
+  if(!game.finished&&game.current===game.players.findIndex(p=>p.bot)&&game.dart<3){
+    setTimeout(botTurn,650);
   }
 }
 
-function chooseBotThrow(bot){
-  // Een BOT mag ook missen. Ongeveer 22% van de worpen is een MISS.
-  if(Math.random()<0.22){
-    return 0;
-  }
-
-  // Als exact 5 mogelijk is, probeert de BOT dat geregeld,
-  // maar hij is zeker niet perfect.
-  const needed=5-bot.counter;
-  if(needed>=1 && needed<=3 && Math.random()<0.55){
-    return needed;
-  }
-
-  // Gewone, redelijk willekeurige worp.
-  const possible=[1,2,3];
-  return possible[Math.floor(Math.random()*possible.length)];
-}
-
-function chooseBotAttack(target){
-  // Ook als Killer kan de BOT missen.
-  if(Math.random()<0.22){
-    return 0;
-  }
-
-  if(target.killer){
-    if(target.lives>=3){
-      return Math.random()<0.55 ? 2 : 1;
-    }
-    if(target.lives===2){
-      return Math.random()<0.65 ? 2 : 1;
-    }
-    return Math.random()<0.7 ? 1 : 2;
-  }
-
-  // De bot probeert een niet-Killer verder terug te zetten,
-  // maar maakt ook gewone worpen.
-  if(target.counter>=3 && Math.random()<0.55){
-    return 3;
-  }
-
-  return 1+Math.floor(Math.random()*3);
-}
-
-newGame.addEventListener("click",()=>location.reload());
+newGame.addEventListener("click",function(){
+  location.reload();
+});
 </script>
 </body>
 </html>
-index.html
-HTML
