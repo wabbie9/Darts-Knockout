@@ -45,6 +45,8 @@ button:disabled{opacity:.28;cursor:not-allowed}
 .double{border:2px solid #f59e0b}
 .triple{border:2px solid #ef4444}
 .notice{background:#0d1424;padding:11px;border-radius:12px;margin-top:10px;line-height:1.4}
+.throwResultTitle{margin-top:12px;color:#fbbf24;font-size:12px;font-weight:950;letter-spacing:.1em}
+.throwResult{margin-top:5px;background:#27334a;border:2px solid #f59e0b;border-radius:14px;padding:14px;text-align:center;font-size:20px;font-weight:950;min-height:54px;display:flex;align-items:center;justify-content:center}
 .message{min-height:22px}
 .dartrow{display:flex;gap:6px;margin-top:10px}
 .dart{flex:1;background:#0d1424;border:1px solid #34425e;border-radius:9px;padding:8px;text-align:center;font-size:11px}
@@ -96,12 +98,14 @@ Je moet precies 5 halen om Killer te worden. Ga je over 5, dan telt je score ter
 
 <div id="throwCard" class="card">
 <div id="darts" class="dartrow"></div>
-<div id="message" class="notice message"></div>
+<div class="throwResultTitle">LAATSTE WORP</div>
+<div id="message" class="throwResult">Nog geen worp</div>
 </div>
 
 <div id="win" class="card hidden">
 <div id="winMessage" class="win"></div>
 <button id="newGame" class="secondary">Nieuwe wedstrijd</button>
+<button id="mainMenu" class="secondary" style="margin-top:8px">Hoofdmenu</button>
 </div>
 
 </section>
@@ -126,6 +130,7 @@ const throwCard=document.getElementById("throwCard");
 const winBox=document.getElementById("win");
 const winMessage=document.getElementById("winMessage");
 const newGame=document.getElementById("newGame");
+const mainMenu=document.getElementById("mainMenu");
 
 function drawSetup(){
   const selected=mode.value;
@@ -444,7 +449,10 @@ function throwDart(targetIndex,multiplier){
       if(after===0){
         target.counter=0;
         target.killer=false;
-        setMessage("💥 "+type+" op "+target.name+" → 0 / 5. "+target.name+" moet opnieuw opbouwen.");
+        game.finished=true;
+        throwCard.classList.add("hidden");
+        winBox.classList.remove("hidden");
+        winMessage.textContent="🏆 "+attacker.name+" WINT!";
         render();
         return;
       }
@@ -535,6 +543,15 @@ function botTurn(){
 
 newGame.addEventListener("click",function(){
   location.reload();
+});
+
+mainMenu.addEventListener("click",function(){
+  game=null;
+  winBox.classList.add("hidden");
+  throwCard.classList.remove("hidden");
+  gameScreen.classList.add("hidden");
+  setup.classList.remove("hidden");
+  drawSetup();
 });
 </script>
 </body>
