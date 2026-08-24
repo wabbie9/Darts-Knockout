@@ -459,12 +459,14 @@ function throwDart(targetIndex,multiplier){
 
       if(after<0){
         // Te veel schade: terugkaatsen vanaf 0.
-        // 2/5 - Triple = 1/5, 1/5 - Double = 1/5.
+        // Zodra de teller onder 5 komt, is de aanvalsfase DIRECT voorbij.
         target.counter=Math.abs(after);
-        setMessage("💥 "+type+" was te veel → "+target.name+" kaatst terug naar "+target.counter+" / 5.");
+        target.killer=false;
+        setMessage("💥 "+type+" was te veel → "+target.name+" terug naar "+target.counter+" / 5. Opnieuw opbouwen!");
       }else{
         target.counter=after;
-        setMessage("💥 "+type+" op "+target.name+" → "+target.counter+" / 5");
+        target.killer=false;
+        setMessage("💥 "+type+" op "+target.name+" → "+target.counter+" / 5. Opnieuw opbouwen!");
       }
     }
   }
@@ -472,7 +474,8 @@ function throwDart(targetIndex,multiplier){
   render();
 
   if(game.dart===3){
-    setTimeout(nextTurn,500);
+    // Geef de speler even tijd om de laatste worp te zien.
+    setTimeout(nextTurn,2200);
   }
 }
 
@@ -537,7 +540,7 @@ function botTurn(){
   throwDart(targetIndex,value);
 
   if(!game.finished&&game.current===game.players.findIndex(p=>p.bot)&&game.dart<3){
-    setTimeout(botTurn,650);
+    setTimeout(botTurn,850);
   }
 }
 
