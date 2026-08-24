@@ -120,7 +120,6 @@ const startButton=document.getElementById("startButton");
 const turnBox=document.getElementById("turn");
 const phaseBox=document.getElementById("phase");
 const playersBox=document.getElementById("players");
-const dartNo=document.getElementById("dartNo");
 const dartsBox=document.getElementById("darts");
 const message=document.getElementById("message");
 const throwCard=document.getElementById("throwCard");
@@ -276,7 +275,6 @@ function render(){
   const current=currentPlayer();
 
   turnBox.textContent="🎯 "+current.name+" — "+(3-game.dart)+" pijlen over";
-  dartNo.textContent=Math.min(game.dart+1,3);
   phaseBox.textContent=current.killer?"AANVALSFASE":"OPBOUWFASE";
 
   playersBox.innerHTML="";
