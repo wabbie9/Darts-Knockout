@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Darts Knockout</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.app{max-width:520px;margin:auto;padding:20px 16px 30px}.top{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:30px;margin:8px 0 4px}.sub{color:#aab3c5;margin-bottom:20px}.card{background:#151d31;border:1px solid #29344d;border-radius:20px;padding:18px;margin:12px 0}
+.row{display:flex;gap:10px}.row>*{flex:1}label{display:block;color:#aab3c5;font-size:13px;margin-bottom:6px}
+input,button{width:100%;border:0;border-radius:14px;padding:14px;font-size:17px}input{background:#0e1527;color:#fff;border:1px solid #33405d}
+button{background:#f59e0b;color:#111827;font-weight:800;margin-top:10px}button.secondary{background:#27334c;color:#fff}button.danger{background:#b91c1c;color:#fff}
+.big{font-size:48px;font-weight:900;text-align:center;margin:8px 0}.center{text-align:center}.muted{color:#9aa6bc}
+.stat{display:flex;justify-content:space-between;padding:8px 0}.heart{font-size:24px;letter-spacing:2px}.num{font-size:22px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.grid button{margin:0;background:#202b43;color:#fff}.grid button.hit{background:#16a34a}.grid button.miss{background:#374151}
+.hidden{display:none}.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#7c2d12;font-weight:800}.killer{background:#166534}
+.notice{padding:12px;border-radius:14px;background:#10182a;color:#d8dfed;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div><h1>🎯 Darts Knockout</h1><div class="sub">Klaar om te gooien?</div></div><div>🔥</div></div>
+
+<section id="setup" class="card">
+<h2>Nieuw spel</h2>
+<div class="row">
+<div><label>Jouw naam</label><input id="pname" value="Speler"></div>
+<div><label>Bot</label><input id="bname" value="Bot"></div>
+</div>
+<button onclick="startGame()">Start spel</button>
+</section>
+
+<section id="game" class="hidden">
+<div class="card">
+<div class="stat"><span id="playerLabel">Speler</span><span id="playerStatus" class="badge">Nog geen Killer</span></div>
+<div class="big" id="playerNumber">?</div>
+<div class="stat"><span>Treffers</span><span class="num" id="progress">0 / 5</span></div>
+<div class="stat"><span>Levens</span><span class="heart" id="lives">❤️❤️❤️</span></div>
+</div>
+
+<div class="card">
+<div class="center muted">Jouw worp</div>
+<div class="grid" id="numbers"></div>
+<div id="message" class="notice">Raak je eigen nummer 5 keer om Killer te worden.</div>
+</div>
+
+<div class="card">
+<div class="stat"><span id="botLabel">Bot</span><span id="botStatus" class="badge">Nog geen Killer</span></div>
+<div class="stat"><span>Treffers richting Killer</span><span id="botProgress">0 / 5</span></div>
+<div class="stat"><span>Levens</span><span class="heart" id="botLives">❤️❤️❤️</span></div>
+</div>
+
+<button class="secondary" onclick="newGame()">Nieuw spel</button>
+</section>
+</div>
+<script>
+let g={};
+const $=id=>document.getElementById(id);
+function startGame(){
+ const p=$('pname').value.trim()||'Speler', b=$('bname').value.trim()||'Bot';
+ g={p,b,pn:randNum(),bn:randNum(),ph:0,bh:0,pl:3,bl:3,pk:false,bk:false,turn:'p'};
+ while(g.bn===g.pn)g.bn=randNum();
+ $('setup').classList.add('hidden');$('game').classList.remove('hidden');render();
+}
+function randNum(){return Math.floor(Math.random()*20)+1}
+function render(){
+ $('playerLabel').textContent=g.p;$('botLabel').textContent=g.b;
+ $('playerNumber').textContent=g.pn;
+ $('progress').textContent=g.ph+' / 5';$('botProgress').textContent=g.bh+' / 5';
+ $('lives').textContent='❤️'.repeat(Math.max(0,g.pl))+'🖤'.repeat(Math.max(0,3-g.pl));
+ $('botLives').textContent='❤️'.repeat(Math.max(0,g.bl))+'🖤'.repeat(Math.max(0,3-g.bl));
+ $('playerStatus').textContent=g.pk?'KILLER 🔥':'Nog geen Killer';$('playerStatus').className='badge '+(g.pk?'killer':'');
+ $('botStatus').textContent=g.bk?'KILLER 🔥':'Nog geen Killer';$('botStatus').className='badge '+(g.bk?'killer':'');
+ const box=$('numbers');box.innerHTML='';
+ for(let i=1;i<=20;i++){let x=document.createElement('button');x.textContent=i;x.onclick=()=>throwDart(i);box.appendChild(x)}
+}
+function throwDart(n){
+ if(g.pl<=0||g.bl<=0)return;
+ if(!g.pk){
+   if(n===g.pn){g.ph++;msg('Treffer! '+g.ph+' / 5 op je eigen nummer.')}
+   else msg('Mis. Je eigen nummer is '+g.pn+'.');
+   if(g.ph>=5){g.pk=true;msg('🔥 Je bent KILLER! Nu kun je de bot aanvallen.')}
+ }else{
+   if(n===g.bn){g.bl--;msg(n+' geraakt! De bot verliest een leven.')}
+   else msg('Mis. De bot heeft nummer '+g.bn+'.');
+ }
+ if(g.bl<=0){msg('🏆 Jij wint! De bot is uitgeschakeld.');disable();return}
+ botTurn();
+ render();
+}
+function botTurn(){
+ if(g.bl<=0)return;
+ // Simple bot: progresses to Killer, then attacks player's number.
+ if(!g.bk){
+   if(Math.random()<0.42){g.bh++; if(g.bh>=5){g.bk=true;msg('🤖 De bot is KILLER geworden!')}}
+ }else{
+   if(Math.random()<0.38){g.pl--; if(g.pl<=0){msg('🤖 De bot wint! Jij bent uitgeschakeld.');disable()}}
+ }
+}
+function disable(){document.querySelectorAll('#numbers button').forEach(b=>b.disabled=true)}
+function msg(t){$('message').textContent=t}
+function newGame(){location.reload()}
+</script>
+</body>
+</html>
