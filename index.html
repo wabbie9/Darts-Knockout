@@ -1,144 +1,790 @@
-
 <!doctype html>
 <html lang="nl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Darts Knockout</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;background:#090e1a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:650px;margin:auto;padding:15px 13px 30px}h1{margin:5px 0;font-size:30px}.sub{color:#aab6ca;margin-bottom:12px}
-.card{background:#151e31;border:1px solid #2b3853;border-radius:20px;padding:15px;margin:11px 0}h2{margin:0 0 11px}
-.row{display:flex;gap:9px}.row>*{flex:1}label{display:block;color:#aab6ca;font-size:13px;margin-bottom:4px}
-input,select,button{width:100%;padding:12px;border-radius:12px;font-size:16px}input,select{background:#0d1424;color:#fff;border:1px solid #34425e}
-button{border:0;background:#f59e0b;color:#111827;font-weight:900;margin-top:9px}.secondary{background:#29364f;color:#fff}
-.players{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.player{background:#0d1424;border-radius:14px;padding:10px}.active{outline:3px solid #f59e0b}
-.name{font-weight:900}.num{font-size:31px;font-weight:950}.small{font-size:12px;color:#aab6ca}.killer{color:#4ade80;font-weight:900}
-.hearts{font-size:19px;margin:2px 0}.bar{height:7px;background:#27334a;border-radius:9px;overflow:hidden;margin-top:5px}.fill{height:100%;background:#f59e0b}
-.turn{background:#f59e0b;color:#111827;border-radius:14px;padding:12px;text-align:center;font-size:20px;font-weight:950;margin:10px 0}
-.phase{color:#fbbf24;font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.notice{background:#0d1424;padding:10px;border-radius:12px;margin-top:9px;line-height:1.35}
-.mult{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.mult button{min-height:65px;margin:0;color:#fff;background:#26344d}.single{border:2px solid #22c55e!important}.double{border:2px solid #f59e0b!important}.triple{border:2px solid #ef4444!important}
-.targetHint{font-size:11px;color:#aab6ca;margin-top:7px}
-.targetBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:7px}
-.targetBtns button{margin:0;padding:8px 3px;font-size:11px;min-height:42px}
-.targetBtns button:disabled{opacity:.25;filter:grayscale(1)}
-.dartrow{display:flex;gap:6px;margin-top:9px}.dart{flex:1;background:#0d1424;border:1px solid #34425e;border-radius:9px;padding:7px;text-align:center;font-size:11px}
-.hidden{display:none}.win{text-align:center;font-size:26px;font-weight:950}.setupgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.playerSetup{background:#0d1424;border-radius:13px;padding:10px}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#090e1a;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+.app{max-width:650px;margin:auto;padding:15px 13px 30px}
+h1{margin:5px 0;font-size:30px}
+.sub{color:#aab6ca;margin-bottom:12px}
+.card{
+  background:#151e31;
+  border:1px solid #2b3853;
+  border-radius:20px;
+  padding:15px;
+  margin:11px 0
+}
+h2{margin:0 0 11px}
+.row{display:flex;gap:9px}
+.row>*{flex:1}
+label{
+  display:block;
+  color:#aab6ca;
+  font-size:13px;
+  margin-bottom:4px
+}
+input,select,button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  font-size:16px
+}
+input,select{
+  background:#0d1424;
+  color:#fff;
+  border:1px solid #34425e
+}
+button{
+  border:0;
+  background:#f59e0b;
+  color:#111827;
+  font-weight:900;
+  margin-top:9px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation
+}
+button:disabled{
+  opacity:.3;
+  cursor:not-allowed
+}
+.secondary{background:#29364f;color:#fff}
+.players{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px
+}
+.player{
+  background:#0d1424;
+  border-radius:14px;
+  padding:10px
+}
+.active{outline:3px solid #f59e0b}
+.name{font-weight:900}
+.num{font-size:31px;font-weight:950}
+.small{font-size:12px;color:#aab6ca}
+.killer{color:#4ade80;font-weight:900}
+.hearts{font-size:19px;margin:2px 0}
+.bar{
+  height:7px;
+  background:#27334a;
+  border-radius:9px;
+  overflow:hidden;
+  margin-top:5px
+}
+.fill{height:100%;background:#f59e0b}
+.turn{
+  background:#f59e0b;
+  color:#111827;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  font-size:20px;
+  font-weight:950;
+  margin:10px 0
+}
+.phase{
+  color:#fbbf24;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+.notice{
+  background:#0d1424;
+  padding:10px;
+  border-radius:12px;
+  margin-top:9px;
+  line-height:1.35
+}
+.targetHint{
+  font-size:11px;
+  color:#aab6ca;
+  margin-top:7px
+}
+.targetBtns{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:7px
+}
+.targetBtns button{
+  margin:0;
+  padding:8px 3px;
+  font-size:11px;
+  min-height:48px
+}
+.targetBtns button:disabled{
+  opacity:.25;
+  filter:grayscale(1)
+}
+.dartrow{
+  display:flex;
+  gap:6px;
+  margin-top:9px
+}
+.dart{
+  flex:1;
+  background:#0d1424;
+  border:1px solid #34425e;
+  border-radius:9px;
+  padding:7px;
+  text-align:center;
+  font-size:11px
+}
+.hidden{display:none}
+.win{
+  text-align:center;
+  font-size:26px;
+  font-weight:950
+}
+.setupgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px
+}
+.playerSetup{
+  background:#0d1424;
+  border-radius:13px;
+  padding:10px
+}
+.single{border:2px solid #22c55e!important}
+.double{border:2px solid #f59e0b!important}
+.triple{border:2px solid #ef4444!important}
+
+@media(max-width:430px){
+  .players{grid-template-columns:1fr}
+  .setupgrid{grid-template-columns:1fr}
+}
 </style>
 </head>
-<body><div class="app">
-<h1>🎯 Darts Knockout</h1><div class="sub">3 pijlen per beurt • Single ×1 • Double ×2 • Triple ×3</div>
+
+<body>
+
+<div class="app">
+
+<h1>🎯 Darts Knockout</h1>
+<div class="sub">
+3 pijlen per beurt • Single ×1 • Double ×2 • Triple ×3
+</div>
 
 <section id="setup" class="card">
-<div class="phase">Spel instellen</div><h2>Hoeveel spelers?</h2>
-<select id="count" onchange="drawSetup()"><option value="2">2 spelers</option><option value="3">3 spelers</option><option value="4">4 spelers</option></select>
+
+<div class="phase">Spel instellen</div>
+<h2>Hoeveel spelers?</h2>
+
+<select id="count" onchange="drawSetup()">
+<option value="2">2 spelers</option>
+<option value="3">3 spelers</option>
+<option value="4">4 spelers</option>
+</select>
+
 <div id="setupPlayers" class="setupgrid" style="margin-top:10px"></div>
+
 <button onclick="start()">Start wedstrijd 🎯</button>
-<div class="notice">Iedere speler krijgt bij de start een eigen nummer. Tijdens het spel zijn er géén nummerknoppen en géén popups.</div>
+
+<div class="notice">
+Iedere speler krijgt bij de start een eigen nummer.
+Tijdens het spel zijn er géén nummerknoppen en géén popups.
+</div>
+
 </section>
 
+
 <section id="game" class="hidden">
+
 <div class="turn" id="turn"></div>
-<div class="card"><div class="phase" id="phase"></div><div class="players" id="players"></div></div>
-<div id="throw" class="card">
-<div class="phase">Pijl <span id="dartNo"></span> van 3</div>
-<div class="notice" id="rules"></div>
-<div class="notice"><b>Kies je worp bij de speler waarop je gooit.</b><br>Single, Double of Triple staat onder iedere speler.</div>
-<div class="dartrow" id="darts"></div><div class="notice" id="msg"></div>
+
+<div class="card">
+
+<div class="phase" id="phase"></div>
+
+<div class="players" id="players"></div>
+
 </div>
-<div id="win" class="card hidden"><div class="win" id="winmsg"></div><button class="secondary" onclick="location.reload()">Nieuwe wedstrijd</button></div>
-</section></div>
+
+
+<div id="throw" class="card">
+
+<div class="phase">
+Pijl <span id="dartNo"></span> van 3
+</div>
+
+<div class="notice" id="rules"></div>
+
+<div class="notice">
+<b>Kies je worp bij de speler waarop je gooit.</b><br>
+Single, Double of Triple staat onder iedere speler.
+</div>
+
+<div class="dartrow" id="darts"></div>
+
+<div class="notice" id="msg"></div>
+
+</div>
+
+
+<div id="win" class="card hidden">
+
+<div class="win" id="winmsg"></div>
+
+<button class="secondary" onclick="location.reload()">
+Nieuwe wedstrijd
+</button>
+
+</div>
+
+</section>
+
+</div>
+
 
 <script>
-let g=null,$=x=>document.getElementById(x);
+
+let g=null;
+
+const $=x=>document.getElementById(x);
+
+
+/* SPELERS INSTELLEN */
+
 function drawSetup(){
- let n=+$('count').value,box=$('setupPlayers');box.innerHTML='';
- for(let i=0;i<n;i++) box.innerHTML+=`<div class="playerSetup"><label>Speler ${i+1}</label><input id="name${i}" value="${i===0?'Speler 1':i===1?'Speler 2':'Speler '+(i+1)}"><label style="margin-top:7px">Nummer</label><input id="num${i}" type="number" min="1" max="20" placeholder="1-20"></div>`;
+
+  const n=+$('count').value;
+  const box=$('setupPlayers');
+
+  box.innerHTML='';
+
+  for(let i=0;i<n;i++){
+
+    box.innerHTML+=`
+      <div class="playerSetup">
+
+        <label>Speler ${i+1}</label>
+
+        <input
+          id="name${i}"
+          value="${i===0?'Speler 1':i===1?'Speler 2':'Speler '+(i+1)}"
+        >
+
+        <label style="margin-top:7px">
+          Nummer
+        </label>
+
+        <input
+          id="num${i}"
+          type="number"
+          min="1"
+          max="20"
+          placeholder="1-20"
+        >
+
+      </div>
+    `;
+  }
 }
+
 drawSetup();
 
+
+/* SPEL STARTEN */
+
 function start(){
- let n=+$('count').value,ps=[];
- for(let i=0;i<n;i++){let name=$('name'+i).value.trim()||'Speler '+(i+1),num=+$('num'+i).value;if(num<1||num>20)return alert('Kies voor iedere speler een nummer van 1 t/m 20.');ps.push({name,num,k:false,t:0,l:3,throws:[]})}
- if(new Set(ps.map(x=>x.num)).size!==ps.length)return alert('Iedere speler moet een verschillend nummer hebben.');
- g={ps,turn:0,darts:0,over:false,busy:false};
- $('setup').classList.add('hidden');$('game').classList.remove('hidden');render();say(g.ps[0].name+' begint.');
+
+  const n=+$('count').value;
+  const ps=[];
+
+  for(let i=0;i<n;i++){
+
+    const name=
+      $('name'+i).value.trim() ||
+      'Speler '+(i+1);
+
+    const num=+$('num'+i).value;
+
+    if(num<1 || num>20){
+      alert('Kies voor iedere speler een nummer van 1 t/m 20.');
+      return;
+    }
+
+    ps.push({
+      name:name,
+      num:num,
+      k:false,
+      t:0,
+      l:3,
+      throws:[]
+    });
+  }
+
+  if(new Set(ps.map(x=>x.num)).size!==ps.length){
+    alert('Iedere speler moet een verschillend nummer hebben.');
+    return;
+  }
+
+  g={
+    ps:ps,
+    turn:0,
+    darts:0,
+    over:false
+  };
+
+  $('setup').classList.add('hidden');
+  $('game').classList.remove('hidden');
+
+  render();
+
+  say(g.ps[0].name+' begint.');
 }
-function cur(){return g.ps[g.turn]}
-function say(x){$('msg').textContent=x}
+
+
+/* HUIDIGE SPELER */
+
+function cur(){
+  return g.ps[g.turn];
+}
+
+
+/* BERICHT */
+
+function say(x){
+  $('msg').textContent=x;
+}
+
+
+/* SCHERM TEKENEN */
 
 function render(){
- let p=cur();$('turn').textContent='🎯 AAN DE BEURT: '+p.name+' — '+(3-g.darts)+' pijlen over';
- $('dartNo').textContent=Math.min(3,g.darts+1);
- $('phase').textContent=g.ps.every(x=>x.k)?'🔥 ALLEMAAL KILLER — AANVALSFASE':'EERST KILLER WORDEN';
- let html='';
- g.ps.forEach((x,i)=>{
-   const isOwn=i===g.turn;
-   const enabled = g.darts<3 && !g.over && (isOwn ? !x.k : cur().k);
-   const disabled = enabled ? '' : 'disabled';
-   const hint = isOwn ? (x.k ? 'Eigen nummer: niet afgooien' : 'Eigen nummer') : (cur().k ? 'Gooi op '+x.name : 'Pas beschikbaar als Killer');
-   html+=`<div class="player ${isOwn?'active':''}">
-    <div class="name">${x.name}</div>
-    <div class="small">Eigen nummer</div>
-    <div class="num">${x.num}</div>
-    <div>${x.k?'<span class="killer">🔥 KILLER</span>':'Killer-teller: '+x.t+'/5'}</div>
-    <div class="hearts">${'❤️'.repeat(x.l)}${'🖤'.repeat(3-x.l)}</div>
-    <div class="small">Levens: ${x.l}/3</div>
-    <div class="bar"><div class="fill" style="width:${x.t/5*100}%"></div></div>
-    <div class="targetHint">${hint}</div>
-    <div class="targetBtns">
-      <button class="single" ${disabled} onclick="targetThrow(${i},1)">SINGLE ×1</button>
-      <button class="double" ${disabled} onclick="targetThrow(${i},2)">DOUBLE ×2</button>
-      <button class="triple" ${disabled} onclick="targetThrow(${i},3)">TRIPLE ×3</button>
-    </div>
-   </div>`});
- $('players').innerHTML=html;
- $('rules').innerHTML=p.k
- ? '<b>Je bent Killer.</b> Klik bij de speler die je wilt raken op <b>Single, Double of Triple</b>. Als die nog geen Killer is, gaat zijn Killer-teller omlaag. Is die al Killer, dan gaan zijn levens omlaag.'
- : '<b>Je bent nog geen Killer.</b> Gebruik de drie knoppen onder je eigen naam. Single/Double/Triple telt 1/2/3 bij je Killer-teller. Over 5 kaatst de teller terug.';
- $('darts').innerHTML=(p.throws||[]).map((x,i)=>`<div class="dart"><b>Pijl ${i+1}</b><br>${x}</div>`).join('');
+
+  if(!g)return;
+
+  const p=cur();
+
+  $('turn').textContent=
+    '🎯 AAN DE BEURT: '+
+    p.name+
+    ' — '+
+    (3-g.darts)+
+    ' pijlen over';
+
+  $('dartNo').textContent=
+    Math.min(3,g.darts+1);
+
+
+  /* FASE */
+
+  const allKillers=
+    g.ps.every(x=>x.k);
+
+  $('phase').textContent=
+    allKillers
+    ? '🔥 ALLEMAAL KILLER — AANVALSFASE'
+    : 'EERST KILLER WORDEN';
+
+
+  let html='';
+
+
+  /* SPELERS */
+
+  g.ps.forEach((x,i)=>{
+
+    const isOwn=i===g.turn;
+
+    /*
+      Voor Killer:
+      alleen eigen speler mag gegooid worden.
+
+      Na Killer:
+      je mag op andere spelers gooien.
+    */
+
+    let enabled=false;
+
+    if(!g.over && g.darts<3){
+
+      if(!p.k){
+        enabled=isOwn;
+      }else{
+        enabled=!isOwn;
+      }
+
+    }
+
+    const disabled=
+      enabled ? '' : 'disabled';
+
+
+    let hint;
+
+    if(!p.k){
+
+      if(isOwn){
+        hint='Je eigen nummer — word Killer door 5 punten te halen.';
+      }else{
+        hint='Niet beschikbaar — eerst Killer worden.';
+      }
+
+    }else{
+
+      if(isOwn){
+        hint='Je eigen nummer — hier kun je niet op gooien.';
+      }else{
+        hint='Aanval op '+x.name+' ('+x.num+').';
+      }
+
+    }
+
+
+    html+=`
+
+      <div class="player ${isOwn?'active':''}">
+
+        <div class="name">
+          ${x.name}
+        </div>
+
+        <div class="small">
+          Eigen nummer
+        </div>
+
+        <div class="num">
+          ${x.num}
+        </div>
+
+        <div>
+          ${
+            x.k
+            ? '<span class="killer">🔥 KILLER</span>'
+            : 'Killer-teller: '+x.t+'/5'
+          }
+        </div>
+
+        <div class="hearts">
+          ${'❤️'.repeat(x.l)}
+          ${'🖤'.repeat(3-x.l)}
+        </div>
+
+        <div class="small">
+          Levens: ${x.l}/3
+        </div>
+
+        <div class="bar">
+
+          <div
+            class="fill"
+            style="width:${Math.min(100,(x.t/5)*100)}%"
+          ></div>
+
+        </div>
+
+        <div class="targetHint">
+          ${hint}
+        </div>
+
+        <div class="targetBtns">
+
+          <button
+            class="single"
+            ${disabled}
+            onclick="targetThrow(${i},1)"
+          >
+            SINGLE ×1
+          </button>
+
+          <button
+            class="double"
+            ${disabled}
+            onclick="targetThrow(${i},2)"
+          >
+            DOUBLE ×2
+          </button>
+
+          <button
+            class="triple"
+            ${disabled}
+            onclick="targetThrow(${i},3)"
+          >
+            TRIPLE ×3
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+  });
+
+
+  $('players').innerHTML=html;
+
+
+  /* REGELS */
+
+  if(!p.k){
+
+    $('rules').innerHTML=`
+      <b>Je bent nog geen Killer.</b><br>
+      Gooi op je eigen nummer.
+      Single = +1, Double = +2, Triple = +3.
+      Bij precies 5 punten word je Killer. 🔥
+    `;
+
+  }else{
+
+    $('rules').innerHTML=`
+      <b>Je bent Killer.</b><br>
+      Val een andere speler aan.
+      Single = 1 schade,
+      Double = 2 schade,
+      Triple = 3 schade.
+      Bij een speler die nog geen Killer is gaat de Killer-teller omlaag.
+      Bij een Killer gaan de levens omlaag.
+    `;
+
+  }
+
+
+  /* PIJLEN */
+
+  $('darts').innerHTML=
+    (p.throws||[])
+    .map((x,i)=>`
+      <div class="dart">
+        <b>Pijl ${i+1}</b><br>
+        ${x}
+      </div>
+    `)
+    .join('');
+
 }
+
+
+/* KNOPPEN */
 
 function targetThrow(targetIndex,m){
- if(g.over||g.busy||g.darts>=3)return;
- const a=cur(),target=g.ps[targetIndex];
 
- // Before Killer, only your own player's buttons are active.
- if(!a.k && targetIndex!==g.turn)return;
- // As Killer, you attack another player's number.
- if(a.k && targetIndex===g.turn)return;
+  if(!g || g.over || g.darts>=3){
+    return;
+  }
 
- g.darts++;
- const label=m===1?'Single':m===2?'Double':'Triple';
- a.throws.push(label+' → '+target.name);
+  const a=cur();
+  const target=g.ps[targetIndex];
 
- if(!a.k){
-   a.t=bounce(a.t,m);
-   if(a.t===5){a.k=true;say('🔥 '+a.name+' is KILLER!');}
-   else say(label+' op '+target.name+' ('+target.num+') → teller '+a.t+'/5.');
- }else{
-   if(!target.k){
-     target.t=Math.max(0,target.t-m);
-     say('💥 '+label+' op '+target.name+' ('+target.num+') → teller '+target.t+'/5.');
-   }else{
-     target.l=Math.max(0,target.l-m);
-     say('💥 '+label+' op '+target.name+' ('+target.num+') → '+target.l+' levens.');
-     if(target.l===0){
-       g.over=true;
-       $('throw').classList.add('hidden');$('win').classList.remove('hidden');
-       $('winmsg').textContent='🏆 '+a.name+' WINT — '+target.name+' IS KNOCKOUT!';
-       render();return;
-     }
-   }
- }
- render();
- if(g.darts===3)setTimeout(nextTurn,450);
+
+  /*
+    NOG GEEN KILLER:
+    alleen op eigen nummer gooien.
+  */
+
+  if(!a.k && targetIndex!==g.turn){
+    return;
+  }
+
+
+  /*
+    WEL KILLER:
+    niet op jezelf gooien.
+  */
+
+  if(a.k && targetIndex===g.turn){
+    return;
+  }
+
+
+  g.darts++;
+
+
+  const label=
+    m===1
+    ? 'Single'
+    : m===2
+    ? 'Double'
+    : 'Triple';
+
+
+  a.throws.push(
+    label+
+    ' → '+
+    target.name+
+    ' ('+
+    target.num+
+    ')'
+  );
+
+
+  /* NOG GEEN KILLER */
+
+  if(!a.k){
+
+    /*
+      Single = 1
+      Double = 2
+      Triple = 3
+
+      Nooit boven 5.
+      Alleen precies 5 = Killer.
+    */
+
+    a.t=Math.min(5,a.t+m);
+
+
+    if(a.t===5){
+
+      a.k=true;
+
+      say(
+        '🔥 '+
+        a.name+
+        ' is KILLER!'
+      );
+
+    }else{
+
+      say(
+        label+
+        ' op '+
+        target.name+
+        ' ('+
+        target.num+
+        ') → teller '+
+        a.t+
+        '/5.'
+      );
+
+    }
+
+  }
+
+
+  /* KILLER VALT AAN */
+
+  else{
+
+    if(!target.k){
+
+      target.t=
+        Math.max(
+          0,
+          target.t-m
+        );
+
+      say(
+        '💥 '+
+        label+
+        ' op '+
+        target.name+
+        ' ('+
+        target.num+
+        ') → teller '+
+        target.t+
+        '/5.'
+      );
+
+    }else{
+
+      target.l=
+        Math.max(
+          0,
+          target.l-m
+        );
+
+      say(
+        '💥 '+
+        label+
+        ' op '+
+        target.name+
+        ' ('+
+        target.num+
+        ') → '+
+        target.l+
+        ' levens.'
+      );
+
+
+      /* KNOCKOUT */
+
+      if(target.l===0){
+
+        g.over=true;
+
+        $('throw').classList.add('hidden');
+        $('win').classList.remove('hidden');
+
+        $('winmsg').textContent=
+          '🏆 '+
+          a.name+
+          ' WINT — '+
+          target.name+
+          ' IS KNOCKOUT!';
+
+        render();
+
+        return;
+      }
+
+    }
+
+  }
+
+
+  render();
+
+
+  /* NA 3 PIJLEN NAAR VOLGENDE SPELER */
+
+  if(g.darts===3){
+
+    setTimeout(
+      nextTurn,
+      450
+    );
+
+  }
+
 }
 
-function humanThrow(m){ /* kept for compatibility; buttons now call targetThrow */ }
+
+/* VOLGENDE SPELER */
 
 function nextTurn(){
- if(g.over)return;
- g.turn=(g.turn+1)%g.ps.length;g.darts=0;g.ps[g.turn].throws=[];render();say(g.ps[g.turn].name+' is aan de beurt. 3 pijlen.');
+
+  if(!g || g.over){
+    return;
+  }
+
+  g.turn=
+    (g.turn+1)%
+    g.ps.length;
+
+  g.darts=0;
+
+  g.ps[g.turn].throws=[];
+
+  render();
+
+  say(
+    g.ps[g.turn].name+
+    ' is aan de beurt. 3 pijlen.'
+  );
+
 }
-</script></body></html>
+
+</script>
+
+</body>
+</html>
