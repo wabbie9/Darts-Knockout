@@ -359,6 +359,23 @@ const setupPlayers=document.getElementById("setupPlayers");
 const difficultyBox=document.getElementById("difficultyBox");
 const difficulty=document.getElementById("difficulty");
 const difficultyValue=document.getElementById("difficultyValue");
+
+// Bewaar de gekozen BOT-moeilijkheid op dit apparaat.
+const savedDifficulty=localStorage.getItem("dartsKnockoutDifficulty");
+if(savedDifficulty && Number(savedDifficulty)>=1 && Number(savedDifficulty)<=10){
+  difficulty.value=savedDifficulty;
+}
+difficultyValue.textContent=difficulty.value+" / 10";
+
+difficulty.addEventListener("input",()=>{
+  difficultyValue.textContent=difficulty.value+" / 10";
+  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
+});
+
+difficulty.addEventListener("change",()=>{
+  difficultyValue.textContent=difficulty.value+" / 10";
+  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
+});
 const startButton=document.getElementById("startButton");
 const turnBox=document.getElementById("turn");
 const phaseBox=document.getElementById("phase");
@@ -481,7 +498,7 @@ function drawSetup(){
 mode.addEventListener("change",drawSetup);
 
 difficulty.addEventListener("input",function(){
-  difficultyValue.textContent=difficulty.value;
+  difficultyValue.textContent=difficulty.value+" / 10";
 });
 
 drawSetup();
@@ -531,7 +548,11 @@ function startGame(){
   }
   const numbers=players.map(p=>p.number);
   if(new Set(numbers).size!==numbers.length){alert("Iedere speler moet een verschillend nummer hebben.");return;}
-  game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
+  if(selected==="bot"){
+  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
+}
+
+game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
 
   // BOT: altijd direct de namenrol. Bullen bestaat niet tegen de BOT.
   if(selected==="bot"){
@@ -959,7 +980,7 @@ function botTurn(){
   let targetIndex=game.current;
   let value;
 
-  const level=game.botDifficulty||5;
+  const level=Math.max(1,Math.min(10,Number(game.botDifficulty)||5));
 
   // Higher level = fewer misses and a better chance to choose a useful throw.
   const missChance=0.38-(level-1)*0.032;
