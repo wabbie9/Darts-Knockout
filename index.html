@@ -531,7 +531,7 @@ function startGame(){
   }
   const numbers=players.map(p=>p.number);
   if(new Set(numbers).size!==numbers.length){alert("Iedere speler moet een verschillend nummer hebben.");return;}
-  game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false};
+  game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
 
   // BOT: altijd direct de namenrol. Bullen bestaat niet tegen de BOT.
   if(selected==="bot"){
@@ -674,6 +674,10 @@ function hasOtherKiller(player){
   return game.players.some(p=>p!==player && p.killer);
 }
 
+function hasAttackTarget(player){
+  return game.players.some(p=>p!==player && p.counter>0);
+}
+
 function render(){
   if(!game)return;
 
@@ -783,20 +787,16 @@ function render(){
   });
 
   dartsBox.innerHTML="";
+  const visibleDarts = game.lastDarts || [];
 
-  // Altijd precies 3 vaste pijl-vakken.
-  // Bij een nieuwe beurt zijn ze leeg en tijdens de beurt
-  // worden ze één voor één gevuld met de nieuwe worpen.
   for(let index=0; index<3; index++){
     const dart=document.createElement("div");
     dart.className="dart";
 
-    const item=current.darts[index];
-
-    if(item){
-      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+item;
+    if(visibleDarts[index]){
+      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+visibleDarts[index];
     }else{
-      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br><span class=\"emptyDart\">Nog niet gegooid</span>";
+      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br><span class="emptyDart">Nog niet gegooid</span>";
     }
 
     dartsBox.appendChild(dart);
@@ -822,6 +822,10 @@ function throwDart(targetIndex,multiplier){
   const attacker=currentPlayer();
   const target=game.players[targetIndex];
 
+  if(game.dart===0){
+    game.lastDarts=[];
+  }
+
   if(!attacker.killer&&targetIndex!==game.current)return;
   if(attacker.killer&&targetIndex===game.current)return;
 
@@ -829,7 +833,9 @@ function throwDart(targetIndex,multiplier){
 
   const type=multiplier===0?"MISS":multiplier===1?"Single":multiplier===2?"Double":"Triple";
 
-  attacker.darts.push(type+" → "+target.name);
+  const dartText=type+" → "+target.name;
+  attacker.darts.push(dartText);
+  game.lastDarts[game.dart-1]=dartText;
 
   if(multiplier===0){
     setMessage("❌ "+attacker.name+" mist — 0 punten.");
@@ -841,7 +847,7 @@ function throwDart(targetIndex,multiplier){
       attacker.killer=true;
       playSound(killerSound);
 
-      if((attacker.turns===1 || attacker.turns===2) && !hasOtherKiller(attacker)){
+      if((attacker.turns===1 || attacker.turns===2) && !hasAttackTarget(attacker)){
         attacker.darts.push("Geen tegenstanders om af te gooien → beurt naar de volgende.");
         setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! Geen tegenstanders om af te gooien → beurt naar de volgende.");
       }else{
@@ -913,8 +919,7 @@ function throwDart(targetIndex,multiplier){
     !game.finished &&
     attacker.killer &&
     (attacker.turns===1 || attacker.turns===2) &&
-    attacker.killer &&
-    !hasOtherKiller(attacker)
+    !hasAttackTarget(attacker)
   ){
     setTimeout(nextTurn,2200);
     return;
