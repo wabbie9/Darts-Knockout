@@ -187,25 +187,23 @@ button:disabled{opacity:.28;cursor:not-allowed}
 .coinFlipResult span{color:#fbbf24;text-transform:uppercase}
 .coinFlipHint{color:#71809a;font-size:12px;margin-top:8px}
 
+.starterChoiceOverlay{position:fixed;inset:0;z-index:3100;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.88)}
+.starterChoiceModal{width:min(94vw,520px);text-align:center;background:#05070c;border:2px solid #f5c542;border-radius:24px;padding:28px 20px;box-shadow:0 20px 90px rgba(0,0,0,.9)}
+.starterChoiceModal h2{margin:0;color:#fbbf24;font-size:30px}.starterChoiceModal p{color:#aab6ca;margin:8px 0 24px}
+.starterChoiceButtons{display:grid;grid-template-columns:1fr 1fr;gap:14px}.starterChoiceBtn{border:1px solid #d9a735;background:#111;color:#ffd45c;border-radius:16px;padding:22px 10px;font-size:20px;font-weight:900;cursor:pointer}
+.bullList{display:grid;gap:10px;margin-top:18px}.bullBtn{border:1px solid #3d4b63;background:#111827;color:#fff;border-radius:14px;padding:16px;font-size:20px;font-weight:800;cursor:pointer}
+.namesRoll{position:relative;width:min(100%,430px);height:160px;overflow:hidden;margin:18px auto;border:2px solid #d5a62a;border-radius:20px;background:#0b0e14;box-shadow:inset 0 0 30px #000}
+.namesRoll:before,.namesRoll:after{content:'';position:absolute;left:0;right:0;height:52px;z-index:3;pointer-events:none}.namesRoll:before{top:0;background:linear-gradient(#0b0e14,transparent)}.namesRoll:after{bottom:0;background:linear-gradient(transparent,#0b0e14)}
+.namesPointer{position:absolute;z-index:4;left:0;right:0;top:50%;height:66px;transform:translateY(-50%);border-top:2px solid #fbbf24;border-bottom:2px solid #fbbf24;background:rgba(251,191,36,.08);pointer-events:none}
+.namesTrack{position:absolute;left:0;right:0;top:0;z-index:1}.rollName{height:160px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:1000;color:#eee;text-shadow:0 3px 12px #000}.rollName.winner{color:#ffd45c}
+
 </style>
 </head>
 
 <body>
 
-<div id="coinFlipOverlay" class="coinFlipOverlay hidden" aria-live="polite">
-  <div class="coinFlipModal">
-    <div class="coinFlipTitle">Wie begint?</div>
-    <div class="coinFlipSub">De dartcoin wordt geflipt...</div>
-    <div class="coinScene">
-      <div id="dartCoin" class="coin">
-        <div class="coinSide coinFront"></div>
-        <div class="coinSide coinBack"></div>
-      </div>
-    </div>
-    <div id="coinFlipResult" class="coinFlipResult">&nbsp;</div>
-    <div class="coinFlipHint">De gekozen speler begint automatisch.</div>
-  </div>
-</div>
+<div id="starterChoiceOverlay" class="starterChoiceOverlay hidden"><div class="starterChoiceModal"><h2>Wie bepaalt de starter?</h2><p>Kies hoe jullie bepalen wie er mag beginnen.</p><div class="starterChoiceButtons"><button id="tossButton" class="starterChoiceBtn">🎲 TOSS</button><button id="bullButton" class="starterChoiceBtn">🎯 BULLEN</button></div></div></div>
+<div id="coinFlipOverlay" class="coinFlipOverlay hidden" aria-live="polite"><div class="coinFlipModal"><div id="coinFlipTitle" class="coinFlipTitle">TOSS</div><div id="coinFlipSub" class="coinFlipSub">De namen worden gerold...</div><div class="namesRoll"><div class="namesPointer"></div><div id="namesTrack" class="namesTrack"></div></div><div id="coinFlipResult" class="coinFlipResult">&nbsp;</div><div id="bullList" class="bullList hidden"></div></div></div>
 
 <div class="app">
 
@@ -356,6 +354,13 @@ const winnerSound=document.getElementById("winnerSound");
 const coinFlipOverlay=document.getElementById("coinFlipOverlay");
 const dartCoin=document.getElementById("dartCoin");
 const coinFlipResult=document.getElementById("coinFlipResult");
+const starterChoiceOverlay=document.getElementById("starterChoiceOverlay");
+const tossButton=document.getElementById("tossButton");
+const bullButton=document.getElementById("bullButton");
+const coinFlipTitle=document.getElementById("coinFlipTitle");
+const coinFlipSub=document.getElementById("coinFlipSub");
+const namesTrack=document.getElementById("namesTrack");
+const bullList=document.getElementById("bullList");
 
 function playSound(audio){
   if(!audio)return;
@@ -422,119 +427,127 @@ function randomFreeNumber(used){
 
 startButton.addEventListener("click",startGame);
 
+tossButton.addEventListener("click",function(){
+  starterChoiceOverlay.classList.add("hidden");
+  runNameRoll();
+});
+
+bullButton.addEventListener("click",function(){
+  starterChoiceOverlay.classList.add("hidden");
+  showBullChoice();
+});
+
 function startGame(){
   const selected=mode.value;
   const players=[];
-
   const firstName=(document.getElementById("name0")?.value.trim())||"Speler 1";
   const firstNumber=Number(document.getElementById("num0")?.value);
-
-  if(firstNumber<1||firstNumber>20){
-    alert("Kies voor iedere speler een nummer van 1 t/m 20.");
-    return;
-  }
-
-  players.push({
-    name:firstName,
-    number:firstNumber,
-    counter:0,
-    killer:false,
-    lives:3,
-    darts:[],
-    turns:0,
-    bot:false
-  });
-
+  if(firstNumber<1||firstNumber>20){alert("Kies voor iedere speler een nummer van 1 t/m 20.");return;}
+  players.push({name:firstName,number:firstNumber,counter:0,killer:false,lives:3,darts:[],turns:0,bot:false});
   if(selected==="bot"){
-    players.push({
-      name:"BOT",
-      number:randomFreeNumber([firstNumber]),
-      counter:0,
-      killer:false,
-      lives:3,
-      darts:[],
-      bot:true
-    });
+    players.push({name:"BOT",number:randomFreeNumber([firstNumber]),counter:0,killer:false,lives:3,darts:[],turns:0,bot:true});
   }else{
     const amount=Number(selected);
-
     for(let i=1;i<amount;i++){
       const playerName=(document.getElementById("name"+i)?.value.trim())||"Speler "+(i+1);
       const playerNumber=Number(document.getElementById("num"+i)?.value);
-
-      if(playerNumber<1||playerNumber>20){
-        alert("Kies voor iedere speler een nummer van 1 t/m 20.");
-        return;
-      }
-
-      players.push({
-        name:playerName,
-        number:playerNumber,
-        counter:0,
-        killer:false,
-        lives:3,
-        darts:[],
-        turns:0,
-        bot:false
-      });
+      if(playerNumber<1||playerNumber>20){alert("Kies voor iedere speler een nummer van 1 t/m 20.");return;}
+      players.push({name:playerName,number:playerNumber,counter:0,killer:false,lives:3,darts:[],turns:0,bot:false});
     }
   }
-
   const numbers=players.map(p=>p.number);
+  if(new Set(numbers).size!==numbers.length){alert("Iedere speler moet een verschillend nummer hebben.");return;}
+  game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false};
 
-  if(new Set(numbers).size!==numbers.length){
-    alert("Iedere speler moet een verschillend nummer hebben.");
+  // BOT: altijd direct de namenrol. Bullen bestaat niet tegen de BOT.
+  if(selected==="bot"){
+    runNameRoll();
     return;
   }
 
-  // De coinflip bepaalt echt wie de eerste beurt krijgt.
-  const firstPlayerIndex=Math.floor(Math.random()*players.length);
+  // Mensen tegen mensen: eerst kiezen tussen TOSS en BULLEN.
+  starterChoiceOverlay.classList.remove("hidden");
+}
 
-  game={
-    players:players,
-    current:firstPlayerIndex,
-    dart:0,
-    finished:false,
-    botMode:selected==="bot",
-    botDifficulty:selected==="bot"?Number(difficulty.value):5,
-    coinFlipDone:false
-  };
-
+function prepareGameScreen(firstPlayerIndex){
+  game.current=firstPlayerIndex;
+  game.players[firstPlayerIndex].turns=1;
+  game.coinFlipDone=true;
   setup.classList.add("hidden");
   gameScreen.classList.remove("hidden");
   render();
-  setMessage("Bepalen wie begint...");
-  showCoinFlip(firstPlayerIndex);
+  setMessage(game.players[firstPlayerIndex].name+" begint. Game On!");
+  playSound(gameOnSound);
+  if(game.botMode&&game.players[firstPlayerIndex].bot){setTimeout(botTurn,700);}
 }
 
-function showCoinFlip(firstPlayerIndex){
-  const winner=game.players[firstPlayerIndex];
+function runNameRoll(){
+  const players=game.players;
+  const winnerIndex=Math.floor(Math.random()*players.length);
+  const winner=players[winnerIndex];
+  coinFlipTitle.textContent="TOSS";
+  coinFlipSub.textContent="De namen rollen...";
   coinFlipResult.classList.remove("show");
   coinFlipResult.innerHTML="&nbsp;";
+  bullList.classList.add("hidden");
+  namesTrack.innerHTML="";
+
+  const rounds=7;
+  const totalSteps=rounds*players.length+winnerIndex;
+  const seq=[];
+  for(let i=0;i<=totalSteps+2;i++){
+    const div=document.createElement("div");
+    div.className="rollName";
+    div.textContent=players[i%players.length].name;
+    seq.push(div);
+    namesTrack.appendChild(div);
+  }
+  namesTrack.style.transition="none";
+  namesTrack.style.transform="translateY(0)";
+  void namesTrack.offsetWidth;
   coinFlipOverlay.classList.remove("hidden");
-
-  // Start de bestaande game-start sound gewoon zoals voorheen.
-  playSound(gameOnSound);
-
-  dartCoin.classList.remove("flipping");
-  void dartCoin.offsetWidth;
-  dartCoin.classList.add("flipping");
+  namesTrack.style.transition="transform 4.8s cubic-bezier(.08,.72,.12,1)";
+  namesTrack.style.transform="translateY(-"+(totalSteps*160)+"px)";
 
   setTimeout(()=>{
+    if(seq[totalSteps]) seq[totalSteps].classList.add("winner");
     coinFlipResult.innerHTML="🎯 <span>"+escapeHtml(winner.name)+" begint!</span>";
     coinFlipResult.classList.add("show");
-    game.players[firstPlayerIndex].turns=1;
-    game.coinFlipDone=true;
-    render();
-
+    coinFlipSub.textContent="De starter is bepaald!";
     setTimeout(()=>{
       coinFlipOverlay.classList.add("hidden");
-      setMessage(winner.name+" begint. Gooi op je eigen nummer.");
-      if(game.botMode&&winner.bot){
-        setTimeout(botTurn,700);
-      }
-    },1300);
-  },2450);
+      prepareGameScreen(winnerIndex);
+    },1100);
+  },4900);
+}
+
+function showBullChoice(){
+  coinFlipTitle.textContent="BULLEN";
+  coinFlipSub.textContent="Wie heeft de bull gewonnen?";
+  namesTrack.innerHTML="";
+  coinFlipResult.classList.remove("show");
+  coinFlipResult.innerHTML="&nbsp;";
+  bullList.innerHTML="";
+  bullList.classList.remove("hidden");
+  coinFlipOverlay.classList.remove("hidden");
+  document.querySelector(".namesRoll").style.display="none";
+  game.players.forEach((player,index)=>{
+    const btn=document.createElement("button");
+    btn.className="bullBtn";
+    btn.textContent=player.name+(player.bot?" 🤖":"");
+    btn.addEventListener("click",()=>{
+      bullList.classList.add("hidden");
+      coinFlipResult.innerHTML="🎯 <span>"+escapeHtml(player.name)+" begint!</span>";
+      coinFlipResult.classList.add("show");
+      coinFlipSub.textContent="Bull gewonnen!";
+      setTimeout(()=>{
+        coinFlipOverlay.classList.add("hidden");
+        document.querySelector(".namesRoll").style.display="block";
+        prepareGameScreen(index);
+      },1000);
+    });
+    bullList.appendChild(btn);
+  });
 }
 
 function escapeHtml(text){
