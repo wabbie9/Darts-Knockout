@@ -853,7 +853,7 @@ function nextTurn(){
   setMessage(currentPlayer().name+" is aan de beurt. 3 pijlen.");
 
   if(game.botMode&&currentPlayer().bot){
-    setTimeout(botTurn,800);
+    setTimeout(botTurn,1200);
   }
 }
 
@@ -918,7 +918,7 @@ function botTurn(){
   throwDart(targetIndex,value);
 
   if(!game.finished&&game.current===game.players.findIndex(p=>p.bot)&&game.dart<3){
-    setTimeout(botTurn,850);
+    setTimeout(botTurn,2500);
   }
 }
 
