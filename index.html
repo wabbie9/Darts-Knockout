@@ -104,6 +104,27 @@ button:disabled{opacity:.28;cursor:not-allowed}
 .appBanner{width:100%;margin:0 0 14px;overflow:hidden;border-radius:16px;line-height:0}
 .appBanner img{display:block;width:100%;height:auto;max-height:240px;object-fit:cover;object-position:center}
 @media(max-width:500px){.appBanner{border-radius:14px;margin-bottom:12px}.appBanner img{max-height:150px}}
+@media(max-width:500px) and (max-height:800px){
+  .app{padding:8px 10px 18px}
+  h1{font-size:25px;margin:2px 0}
+  .sub{margin-bottom:8px;font-size:13px}
+  .card{padding:10px;margin:7px 0;border-radius:16px}
+  .turn{padding:9px;margin:7px 0;font-size:16px}
+  .player{padding:9px;border-radius:13px}
+  .playerName{font-size:16px}
+  .number{font-size:28px;margin:1px 0 4px}
+  .counter{font-size:25px;margin:1px 0 4px}
+  .status{margin-top:5px}
+  .targetButtons{margin-top:7px}
+  .targetButtons button{padding:8px 2px}
+  .throwResultTitle{margin-top:7px}
+  .throwResult{margin-top:4px;padding:9px;min-height:44px;font-size:17px}
+  .dartrow{margin-top:6px;gap:5px}
+  .dart{height:48px;min-height:48px;max-height:48px;padding:4px;font-size:10px}
+  .appBanner{margin-bottom:7px}
+  .appBanner img{max-height:110px}
+}
+
 
 .startInfo{
   display:flex;
@@ -361,35 +382,7 @@ const coinFlipTitle=document.getElementById("coinFlipTitle");
 const coinFlipSub=document.getElementById("coinFlipSub");
 const namesTrack=document.getElementById("namesTrack");
 const bullList=document.getElementById("bullList");
-
-let soundsUnlocked=false;
-
-function unlockSounds(){
-  if(soundsUnlocked)return;
-  const sounds=[gameOnSound,killerSound,winnerSound];
-  sounds.forEach(function(audio){
-    if(!audio)return;
-    try{
-      const oldVolume=audio.volume;
-      audio.volume=0;
-      const promise=audio.play();
-      if(promise&&typeof promise.then==="function"){
-        promise.then(function(){
-          audio.pause();
-          audio.currentTime=0;
-          audio.volume=oldVolume;
-        }).catch(function(){
-          audio.volume=oldVolume;
-        });
-      }else{
-        audio.pause();
-        audio.currentTime=0;
-        audio.volume=oldVolume;
-      }
-    }catch(e){}
-  });
-  soundsUnlocked=true;
-}
+const appBanner=document.querySelector(".appBanner");
 
 function playSound(audio){
   if(!audio)return;
@@ -398,18 +391,10 @@ function playSound(audio){
     audio.currentTime=0;
     const promise=audio.play();
     if(promise&&typeof promise.catch==="function"){
-      promise.catch(function(){
-        // Als de browser het geluid nog blokkeert, proberen we het na de volgende aanraking opnieuw.
-        soundsUnlocked=false;
-      });
+      promise.catch(function(){});
     }
   }catch(e){}
 }
-
-// Ontgrendel de audiomogelijkheden na de eerste echte aanraking/klik.
-["pointerdown","touchstart","keydown"].forEach(function(eventName){
-  document.addEventListener(eventName,unlockSounds,{passive:true,once:true});
-});
 
 rulesButton.addEventListener("click",function(){
   rulesOverlay.classList.remove("hidden");
@@ -513,6 +498,7 @@ function startGame(){
 }
 
 function prepareGameScreen(firstPlayerIndex){
+  if(appBanner) appBanner.style.display="none";
   game.current=firstPlayerIndex;
   game.players[firstPlayerIndex].turns=1;
   game.coinFlipDone=true;
@@ -970,6 +956,7 @@ newGame.addEventListener("click",function(){
 });
 
 mainMenu.addEventListener("click",function(){
+  if(appBanner) appBanner.style.display="";
   game=null;
   winBox.classList.add("hidden");
   throwCard.classList.remove("hidden");
