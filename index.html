@@ -710,10 +710,10 @@ function render(){
 
     card.appendChild(status);
 
-    // Als de BOT aan het opbouwen is naar 5, krijgt hij geen knoppen.
-    // Als JIJ Killer bent, komen de aanvalsknoppen juist ook bij de BOT tevoorschijn.
-    // Zo kun je bij de BOT MISS / Single / Double / Triple kiezen.
-    const showButtons =
+    // De knoppen blijven tijdens de hele game zichtbaar bij iedere speler.
+    // Ze worden alleen ingeschakeld wanneer deze worp op dit moment geldig is.
+    // Zo blijft de hoogte van beide spelerskaarten altijd gelijk en verspringt de pagina niet.
+    const canThrow =
       !game.finished &&
       game.dart<3 &&
       !current.bot &&
@@ -722,17 +722,15 @@ function render(){
         (current.killer && index!==game.current)
       );
 
-    if(showButtons){
-      const buttons=document.createElement("div");
-      buttons.className="targetButtons";
+    const buttons=document.createElement("div");
+    buttons.className="targetButtons";
 
-      buttons.appendChild(makeButton("MISS","miss",index,0,true));
-      buttons.appendChild(makeButton("SINGLE ×1","single",index,1,true));
-      buttons.appendChild(makeButton("DOUBLE ×2","double",index,2,true));
-      buttons.appendChild(makeButton("TRIPLE ×3","triple",index,3,true));
+    buttons.appendChild(makeButton("MISS","miss",index,0,canThrow));
+    buttons.appendChild(makeButton("SINGLE ×1","single",index,1,canThrow));
+    buttons.appendChild(makeButton("DOUBLE ×2","double",index,2,canThrow));
+    buttons.appendChild(makeButton("TRIPLE ×3","triple",index,3,canThrow));
 
-      card.appendChild(buttons);
-    }
+    card.appendChild(buttons);
 
     playersBox.appendChild(card);
   });
