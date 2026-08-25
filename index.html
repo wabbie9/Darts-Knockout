@@ -248,7 +248,7 @@ button:disabled{opacity:.28;cursor:not-allowed}
 </select>
 
 <div id="difficultyBox" class="difficultyBox">
-  <label for="difficulty">BOT moeilijkheid: <b><span id="difficultyValue">5</span> / 10</b></label>
+  <label for="difficulty">BOT moeilijkheid: <b><span id="difficultyValue">5 / 10</span></b></label>
   <input id="difficulty" type="range" min="1" max="10" value="5" step="1">
   <div class="difficultyLabels"><span>Makkelijk</span><span>Moeilijk</span></div>
 </div>
@@ -359,23 +359,6 @@ const setupPlayers=document.getElementById("setupPlayers");
 const difficultyBox=document.getElementById("difficultyBox");
 const difficulty=document.getElementById("difficulty");
 const difficultyValue=document.getElementById("difficultyValue");
-
-// Bewaar de gekozen BOT-moeilijkheid op dit apparaat.
-const savedDifficulty=localStorage.getItem("dartsKnockoutDifficulty");
-if(savedDifficulty && Number(savedDifficulty)>=1 && Number(savedDifficulty)<=10){
-  difficulty.value=savedDifficulty;
-}
-difficultyValue.textContent=difficulty.value+" / 10";
-
-difficulty.addEventListener("input",()=>{
-  difficultyValue.textContent=difficulty.value+" / 10";
-  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
-});
-
-difficulty.addEventListener("change",()=>{
-  difficultyValue.textContent=difficulty.value+" / 10";
-  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
-});
 const startButton=document.getElementById("startButton");
 const turnBox=document.getElementById("turn");
 const phaseBox=document.getElementById("phase");
@@ -406,41 +389,24 @@ const bullList=document.getElementById("bullList");
 const appBanner=document.querySelector(".appBanner");
 
 let audioUnlocked=false;
-
 function unlockSounds(){
   if(audioUnlocked)return;
-  const sounds=[gameOnSound,killerSound,winnerSound];
-
-  sounds.forEach(audio=>{
+  [gameOnSound,killerSound,winnerSound].forEach(audio=>{
     if(!audio)return;
     try{
-      // Alleen "unlocken" tijdens een echte gebruikersklik.
-      // Muted voorkomt dat er hierbij een willekeurig geluid hoorbaar wordt.
       audio.muted=true;
       audio.currentTime=0;
-      const promise=audio.play();
-
-      if(promise&&typeof promise.then==="function"){
-        promise.then(()=>{
-          audio.pause();
-          audio.currentTime=0;
-          audio.muted=false;
-        }).catch(()=>{
-          audio.muted=false;
-        });
+      const p=audio.play();
+      if(p&&p.then){
+        p.then(()=>{audio.pause();audio.currentTime=0;audio.muted=false;})
+         .catch(()=>{audio.muted=false;});
       }else{
-        audio.pause();
-        audio.currentTime=0;
-        audio.muted=false;
+        audio.pause();audio.currentTime=0;audio.muted=false;
       }
-    }catch(e){
-      try{audio.muted=false;}catch(_){}
-    }
+    }catch(e){try{audio.muted=false;}catch(_){}}
   });
-
   audioUnlocked=true;
 }
-
 function playSound(audio){
   if(!audio)return;
   try{
@@ -448,9 +414,7 @@ function playSound(audio){
     audio.currentTime=0;
     audio.muted=false;
     const promise=audio.play();
-    if(promise&&typeof promise.catch==="function"){
-      promise.catch(function(){});
-    }
+    if(promise&&promise.catch)promise.catch(()=>{});
   }catch(e){}
 }
 
@@ -497,8 +461,15 @@ function drawSetup(){
 
 mode.addEventListener("change",drawSetup);
 
+const savedDifficulty=localStorage.getItem("dartsKnockoutDifficulty");
+if(savedDifficulty && Number(savedDifficulty)>=1 && Number(savedDifficulty)<=10){
+  difficulty.value=savedDifficulty;
+}
+difficultyValue.textContent=difficulty.value+" / 10";
+
 difficulty.addEventListener("input",function(){
   difficultyValue.textContent=difficulty.value+" / 10";
+  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
 });
 
 drawSetup();
@@ -511,10 +482,7 @@ function randomFreeNumber(used){
   return free[Math.floor(Math.random()*free.length)];
 }
 
-startButton.addEventListener("click",function(){
-  unlockSounds();
-  startGame();
-});
+startButton.addEventListener("click",function(){unlockSounds();startGame();});
 
 tossButton.addEventListener("click",function(){
   unlockSounds();
@@ -548,11 +516,7 @@ function startGame(){
   }
   const numbers=players.map(p=>p.number);
   if(new Set(numbers).size!==numbers.length){alert("Iedere speler moet een verschillend nummer hebben.");return;}
-  if(selected==="bot"){
-  localStorage.setItem("dartsKnockoutDifficulty",difficulty.value);
-}
-
-game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
+  game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
 
   // BOT: altijd direct de namenrol. Bullen bestaat niet tegen de BOT.
   if(selected==="bot"){
@@ -648,7 +612,6 @@ function showBullChoice(){
     btn.className="bullBtn";
     btn.textContent=player.name+(player.bot?" 🤖":"");
     btn.addEventListener("click",()=>{
-      unlockSounds();
       bullList.classList.add("hidden");
       coinFlipResult.innerHTML="🎯 <span>"+escapeHtml(player.name)+" begint!</span>";
       coinFlipResult.classList.add("show");
@@ -694,7 +657,6 @@ function applyOwnThrow(player,value){
 function hasOtherKiller(player){
   return game.players.some(p=>p!==player && p.killer);
 }
-
 function hasAttackTarget(player){
   return game.players.some(p=>p!==player && p.counter>0);
 }
@@ -808,16 +770,17 @@ function render(){
   });
 
   dartsBox.innerHTML="";
-  const visibleDarts = game.lastDarts || [];
 
+  const visibleDarts=game.lastDarts||[];
   for(let index=0; index<3; index++){
     const dart=document.createElement("div");
     dart.className="dart";
+    const item=visibleDarts[index];
 
-    if(visibleDarts[index]){
-      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+visibleDarts[index];
+    if(item){
+      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br>"+item;
     }else{
-      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br><span class="emptyDart">Nog niet gegooid</span>";
+      dart.innerHTML="<b>Pijl "+(index+1)+"</b><br><span class=\"emptyDart\">Nog niet gegooid</span>";
     }
 
     dartsBox.appendChild(dart);
@@ -843,9 +806,7 @@ function throwDart(targetIndex,multiplier){
   const attacker=currentPlayer();
   const target=game.players[targetIndex];
 
-  if(game.dart===0){
-    game.lastDarts=[];
-  }
+  if(game.dart===0) game.lastDarts=[];
 
   if(!attacker.killer&&targetIndex!==game.current)return;
   if(attacker.killer&&targetIndex===game.current)return;
@@ -940,7 +901,8 @@ function throwDart(targetIndex,multiplier){
     !game.finished &&
     attacker.killer &&
     (attacker.turns===1 || attacker.turns===2) &&
-    !hasAttackTarget(attacker)
+    attacker.killer &&
+    !hasOtherKiller(attacker)
   ){
     setTimeout(nextTurn,2200);
     return;
