@@ -829,9 +829,9 @@ function throwDart(targetIndex,multiplier){
       attacker.killer=true;
       playSound(killerSound);
 
-      if((attacker.turns===1 || attacker.turns===2) && !hasAttackTarget(attacker)){
+      if(!hasAttackTarget(attacker)){
         attacker.darts.push("Geen tegenstanders om af te gooien → beurt naar de volgende.");
-        setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! Geen tegenstanders om af te gooien → beurt naar de volgende.");
+        setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! Niemand heeft punten om af te gooien → beurt naar de volgende.");
       }else{
         setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! 🔥");
       }
@@ -900,9 +900,7 @@ function throwDart(targetIndex,multiplier){
   if(
     !game.finished &&
     attacker.killer &&
-    (attacker.turns===1 || attacker.turns===2) &&
-    attacker.killer &&
-    !hasOtherKiller(attacker)
+    !hasAttackTarget(attacker)
   ){
     setTimeout(nextTurn,2200);
     return;
