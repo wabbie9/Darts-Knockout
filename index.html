@@ -485,29 +485,45 @@ function runNameRoll(){
   const players=game.players;
   const winnerIndex=Math.floor(Math.random()*players.length);
   const winner=players[winnerIndex];
+
   coinFlipTitle.textContent="TOSS";
   coinFlipSub.textContent="De namen rollen...";
   coinFlipResult.classList.remove("show");
   coinFlipResult.innerHTML="&nbsp;";
   bullList.classList.add("hidden");
+  document.querySelector(".namesRoll").style.display="block";
   namesTrack.innerHTML="";
 
-  const rounds=7;
+  // Maak een lange echte namenrol. De winnaar wordt pas helemaal aan het
+  // einde bereikt; tijdens de rol komen alle ingevoerde namen steeds voorbij.
+  const rounds=10;
   const totalSteps=rounds*players.length+winnerIndex;
+  const itemHeight=160;
   const seq=[];
+
   for(let i=0;i<=totalSteps+2;i++){
     const div=document.createElement("div");
     div.className="rollName";
     div.textContent=players[i%players.length].name;
-    seq.push(div);
     namesTrack.appendChild(div);
+    seq.push(div);
   }
+
+  // Begin met een naam boven/onder de pijl, nooit meteen met de uiteindelijke winnaar.
   namesTrack.style.transition="none";
-  namesTrack.style.transform="translateY(0)";
-  void namesTrack.offsetWidth;
+  namesTrack.style.transform="translate3d(0,-20px,0)";
+
   coinFlipOverlay.classList.remove("hidden");
-  namesTrack.style.transition="transform 4.8s cubic-bezier(.08,.72,.12,1)";
-  namesTrack.style.transform="translateY(-"+(totalSteps*160)+"px)";
+  void namesTrack.offsetWidth;
+
+  // Start de rol op de volgende frame zodat de browser gegarandeerd een
+  // beginpositie tekent voordat de beweging begint.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      namesTrack.style.transition="transform 6.2s cubic-bezier(.06,.72,.08,1)";
+      namesTrack.style.transform="translate3d(0,-"+(totalSteps*itemHeight+20)+"px,0)";
+    });
+  });
 
   setTimeout(()=>{
     if(seq[totalSteps]) seq[totalSteps].classList.add("winner");
@@ -518,7 +534,7 @@ function runNameRoll(){
       coinFlipOverlay.classList.add("hidden");
       prepareGameScreen(winnerIndex);
     },1100);
-  },4900);
+  },6400);
 }
 
 function showBullChoice(){
