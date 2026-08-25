@@ -143,10 +143,70 @@ button:disabled{opacity:.28;cursor:not-allowed}
   .startInfo{flex-direction:column}
   .rulesButton{width:100%}
 }
+
+.coinFlipOverlay{
+  position:fixed;inset:0;z-index:3000;
+  display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(0,0,0,.88);
+}
+.coinFlipModal{
+  width:min(94vw,520px);text-align:center;
+  background:#05070c;border:2px solid #f5c542;border-radius:24px;
+  padding:22px 18px 24px;box-shadow:0 20px 90px rgba(0,0,0,.85);
+}
+.coinFlipTitle{color:#fbbf24;font-size:14px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}
+.coinFlipSub{color:#aab6ca;margin-top:6px;font-size:15px}
+.coinScene{width:190px;height:190px;margin:20px auto 18px;perspective:900px}
+.coin{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.coin.flipping{animation:coinFlip 2.4s cubic-bezier(.15,.7,.25,1) both}
+.coinSide{
+  position:absolute;inset:0;border-radius:50%;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border:7px solid #d5a62a;
+  background:radial-gradient(circle,#111827 0 8%,#fbbf24 9% 12%,#111827 13% 23%,#ef4444 24% 34%,#111827 35% 47%,#fbbf24 48% 53%,#111827 54% 68%,#ef4444 69% 76%,#111827 77% 100%);
+  box-shadow:inset 0 0 0 4px #6b4b0b,0 12px 35px rgba(0,0,0,.65);
+}
+.coinSide:after{
+  content:'🎯';font-size:66px;filter:drop-shadow(0 3px 2px rgba(0,0,0,.55));
+}
+.coinBack{transform:rotateY(180deg)}
+@keyframes coinFlip{
+  0%{transform:rotateY(0deg) translateY(0) scale(1)}
+  12%{transform:rotateY(180deg) translateY(-12px) scale(1.04)}
+  25%{transform:rotateY(360deg) translateY(-26px) scale(1.08)}
+  38%{transform:rotateY(540deg) translateY(-38px) scale(1.1)}
+  50%{transform:rotateY(720deg) translateY(-42px) scale(1.11)}
+  63%{transform:rotateY(900deg) translateY(-34px) scale(1.08)}
+  76%{transform:rotateY(1080deg) translateY(-20px) scale(1.05)}
+  90%{transform:rotateY(1260deg) translateY(-5px) scale(1.02)}
+  100%{transform:rotateY(1440deg) translateY(0) scale(1)}
+}
+.coinFlipResult{min-height:64px;font-size:28px;font-weight:1000;color:#fff;opacity:0;transform:translateY(8px);transition:.35s ease}
+.coinFlipResult.show{opacity:1;transform:translateY(0)}
+.coinFlipResult span{color:#fbbf24;text-transform:uppercase}
+.coinFlipHint{color:#71809a;font-size:12px;margin-top:8px}
+
 </style>
 </head>
 
 <body>
+
+<div id="coinFlipOverlay" class="coinFlipOverlay hidden" aria-live="polite">
+  <div class="coinFlipModal">
+    <div class="coinFlipTitle">Wie begint?</div>
+    <div class="coinFlipSub">De dartcoin wordt geflipt...</div>
+    <div class="coinScene">
+      <div id="dartCoin" class="coin">
+        <div class="coinSide coinFront"></div>
+        <div class="coinSide coinBack"></div>
+      </div>
+    </div>
+    <div id="coinFlipResult" class="coinFlipResult">&nbsp;</div>
+    <div class="coinFlipHint">De gekozen speler begint automatisch.</div>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="appBanner">
@@ -293,6 +353,9 @@ const rulesClose=document.getElementById("rulesClose");
 const gameOnSound=document.getElementById("gameOnSound");
 const killerSound=document.getElementById("killerSound");
 const winnerSound=document.getElementById("winnerSound");
+const coinFlipOverlay=document.getElementById("coinFlipOverlay");
+const dartCoin=document.getElementById("dartCoin");
+const coinFlipResult=document.getElementById("coinFlipResult");
 
 function playSound(audio){
   if(!audio)return;
@@ -360,7 +423,6 @@ function randomFreeNumber(used){
 startButton.addEventListener("click",startGame);
 
 function startGame(){
-  playSound(gameOnSound);
   const selected=mode.value;
   const players=[];
 
@@ -425,22 +487,60 @@ function startGame(){
     return;
   }
 
-  players[0].turns=1;
+  // De coinflip bepaalt echt wie de eerste beurt krijgt.
+  const firstPlayerIndex=Math.floor(Math.random()*players.length);
 
   game={
     players:players,
-    current:0,
+    current:firstPlayerIndex,
     dart:0,
     finished:false,
     botMode:selected==="bot",
-    botDifficulty:selected==="bot"?Number(difficulty.value):5
+    botDifficulty:selected==="bot"?Number(difficulty.value):5,
+    coinFlipDone:false
   };
 
   setup.classList.add("hidden");
   gameScreen.classList.remove("hidden");
-
   render();
-  setMessage(players[0].name+" begint. Gooi op je eigen nummer.");
+  setMessage("Bepalen wie begint...");
+  showCoinFlip(firstPlayerIndex);
+}
+
+function showCoinFlip(firstPlayerIndex){
+  const winner=game.players[firstPlayerIndex];
+  coinFlipResult.classList.remove("show");
+  coinFlipResult.innerHTML="&nbsp;";
+  coinFlipOverlay.classList.remove("hidden");
+
+  // Start de bestaande game-start sound gewoon zoals voorheen.
+  playSound(gameOnSound);
+
+  dartCoin.classList.remove("flipping");
+  void dartCoin.offsetWidth;
+  dartCoin.classList.add("flipping");
+
+  setTimeout(()=>{
+    coinFlipResult.innerHTML="🎯 <span>"+escapeHtml(winner.name)+" begint!</span>";
+    coinFlipResult.classList.add("show");
+    game.players[firstPlayerIndex].turns=1;
+    game.coinFlipDone=true;
+    render();
+
+    setTimeout(()=>{
+      coinFlipOverlay.classList.add("hidden");
+      setMessage(winner.name+" begint. Gooi op je eigen nummer.");
+      if(game.botMode&&winner.bot){
+        setTimeout(botTurn,700);
+      }
+    },1300);
+  },2450);
+}
+
+function escapeHtml(text){
+  return String(text).replace(/[&<>\"]/g,function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;"})[c];
+  });
 }
 
 function currentPlayer(){
