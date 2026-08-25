@@ -201,7 +201,10 @@ Gooi eerst met je minst dominante arm om een nummer te bepalen. De BOT kiest aut
     <h3>3. Te hoog gegooid?</h3>
     <p>Ga je boven 5, dan telt je score terug vanaf 5. Bijvoorbeeld: je staat op 4 / 5 en gooit een Triple. Je komt op 7 en gaat terug naar <b>3 / 5</b>.</p>
 
-    <h3>4. Aanvalsfase</h3>
+    <h3>4. Nog geen tegenstander om af te gooien?</h3>
+    <p>Haal je in je <b>eerste of tweede beurt</b> precies 5 / 5, maar is er nog geen andere Killer om af te gooien, dan gaat je beurt automatisch naar de volgende speler.</p>
+
+    <h3>5. Aanvalsfase</h3>
     <p>Ben je Killer, dan kun je andere spelers aanvallen. Je kunt niet jezelf aanvallen.</p>
     <ul>
       <li>MISS = 0 schade</li>
@@ -214,10 +217,10 @@ Gooi eerst met je minst dominante arm om een nummer te bepalen. De BOT kiest aut
     <p>De schade wordt van de teller van je tegenstander afgetrokken. Bijvoorbeeld: een speler staat op 4 / 5 en krijgt een Double → <b>2 / 5</b>.</p>
     <p>Ga je met je aanval onder 0, dan kaatst het resultaat terug. Bijvoorbeeld: 2 / 5 en een Triple → <b>1 / 5</b>. De tegenstander is dan geen Killer meer en moet opnieuw opbouwen.</p>
 
-    <h3>6. Winnen</h3>
+    <h3>7. Winnen</h3>
     <p>Breng je de teller van een tegenstander precies naar 0, dan win je de wedstrijd. De winnaar verschijnt in beeld. 🏆</p>
 
-    <h3>7. Beurten</h3>
+    <h3>8. Beurten</h3>
     <p>Iedere speler krijgt maximaal 3 pijlen per beurt. Daarna gaat de beurt automatisch naar de volgende speler.</p>
 
     <button id="rulesClose" class="rulesClose">Sluiten</button>
@@ -376,6 +379,7 @@ function startGame(){
     killer:false,
     lives:3,
     darts:[],
+    turns:0,
     bot:false
   });
 
@@ -408,6 +412,7 @@ function startGame(){
         killer:false,
         lives:3,
         darts:[],
+        turns:0,
         bot:false
       });
     }
@@ -419,6 +424,8 @@ function startGame(){
     alert("Iedere speler moet een verschillend nummer hebben.");
     return;
   }
+
+  players[0].turns=1;
 
   game={
     players:players,
@@ -456,6 +463,10 @@ function applyOwnThrow(player,value){
     bust:true,
     killer:false
   };
+}
+
+function hasOtherKiller(player){
+  return game.players.some(p=>p!==player && p.killer);
 }
 
 function render(){
@@ -615,7 +626,13 @@ function throwDart(targetIndex,multiplier){
     if(result.killer){
       attacker.killer=true;
       playSound(killerSound);
-      setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! 🔥");
+
+      if((attacker.turns===1 || attacker.turns===2) && !hasOtherKiller(attacker)){
+        attacker.darts.push("Geen tegenstanders om af te gooien → beurt naar de volgende.");
+        setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! Geen tegenstanders om af te gooien → beurt naar de volgende.");
+      }else{
+        setMessage("🔥 "+attacker.name+" heeft precies 5 / 5 gehaald! 🔥");
+      }
     }else if(result.bust){
       setMessage(type+" was te veel → terug naar "+attacker.counter+" / 5.");
     }else{
@@ -678,6 +695,17 @@ function throwDart(targetIndex,multiplier){
 
   render();
 
+  if(
+    !game.finished &&
+    attacker.killer &&
+    (attacker.turns===1 || attacker.turns===2) &&
+    attacker.killer &&
+    !hasOtherKiller(attacker)
+  ){
+    setTimeout(nextTurn,2200);
+    return;
+  }
+
   if(game.dart===3){
     // Geef de speler even tijd om de laatste worp te zien.
     setTimeout(nextTurn,2200);
@@ -689,6 +717,7 @@ function nextTurn(){
 
   game.current=(game.current+1)%game.players.length;
   game.dart=0;
+  game.players[game.current].turns++;
   game.players[game.current].darts=[];
 
   render();
