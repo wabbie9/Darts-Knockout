@@ -388,11 +388,48 @@ const namesTrack=document.getElementById("namesTrack");
 const bullList=document.getElementById("bullList");
 const appBanner=document.querySelector(".appBanner");
 
+let audioUnlocked=false;
+
+function unlockSounds(){
+  if(audioUnlocked)return;
+  const sounds=[gameOnSound,killerSound,winnerSound];
+
+  sounds.forEach(audio=>{
+    if(!audio)return;
+    try{
+      // Alleen "unlocken" tijdens een echte gebruikersklik.
+      // Muted voorkomt dat er hierbij een willekeurig geluid hoorbaar wordt.
+      audio.muted=true;
+      audio.currentTime=0;
+      const promise=audio.play();
+
+      if(promise&&typeof promise.then==="function"){
+        promise.then(()=>{
+          audio.pause();
+          audio.currentTime=0;
+          audio.muted=false;
+        }).catch(()=>{
+          audio.muted=false;
+        });
+      }else{
+        audio.pause();
+        audio.currentTime=0;
+        audio.muted=false;
+      }
+    }catch(e){
+      try{audio.muted=false;}catch(_){}
+    }
+  });
+
+  audioUnlocked=true;
+}
+
 function playSound(audio){
   if(!audio)return;
   try{
     audio.pause();
     audio.currentTime=0;
+    audio.muted=false;
     const promise=audio.play();
     if(promise&&typeof promise.catch==="function"){
       promise.catch(function(){});
@@ -457,14 +494,19 @@ function randomFreeNumber(used){
   return free[Math.floor(Math.random()*free.length)];
 }
 
-startButton.addEventListener("click",startGame);
+startButton.addEventListener("click",function(){
+  unlockSounds();
+  startGame();
+});
 
 tossButton.addEventListener("click",function(){
+  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   runNameRoll();
 });
 
 bullButton.addEventListener("click",function(){
+  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   showBullChoice();
 });
@@ -585,6 +627,7 @@ function showBullChoice(){
     btn.className="bullBtn";
     btn.textContent=player.name+(player.bot?" 🤖":"");
     btn.addEventListener("click",()=>{
+      unlockSounds();
       bullList.classList.add("hidden");
       coinFlipResult.innerHTML="🎯 <span>"+escapeHtml(player.name)+" begint!</span>";
       coinFlipResult.classList.add("show");
