@@ -362,11 +362,54 @@ const coinFlipSub=document.getElementById("coinFlipSub");
 const namesTrack=document.getElementById("namesTrack");
 const bullList=document.getElementById("bullList");
 
+let soundsUnlocked=false;
+
+function unlockSounds(){
+  if(soundsUnlocked)return;
+  const sounds=[gameOnSound,killerSound,winnerSound];
+  sounds.forEach(function(audio){
+    if(!audio)return;
+    try{
+      const oldVolume=audio.volume;
+      audio.volume=0;
+      const promise=audio.play();
+      if(promise&&typeof promise.then==="function"){
+        promise.then(function(){
+          audio.pause();
+          audio.currentTime=0;
+          audio.volume=oldVolume;
+        }).catch(function(){
+          audio.volume=oldVolume;
+        });
+      }else{
+        audio.pause();
+        audio.currentTime=0;
+        audio.volume=oldVolume;
+      }
+    }catch(e){}
+  });
+  soundsUnlocked=true;
+}
+
 function playSound(audio){
   if(!audio)return;
-  audio.currentTime=0;
-  audio.play().catch(()=>{});
+  try{
+    audio.pause();
+    audio.currentTime=0;
+    const promise=audio.play();
+    if(promise&&typeof promise.catch==="function"){
+      promise.catch(function(){
+        // Als de browser het geluid nog blokkeert, proberen we het na de volgende aanraking opnieuw.
+        soundsUnlocked=false;
+      });
+    }
+  }catch(e){}
 }
+
+// Ontgrendel de audiomogelijkheden na de eerste echte aanraking/klik.
+["pointerdown","touchstart","keydown"].forEach(function(eventName){
+  document.addEventListener(eventName,unlockSounds,{passive:true,once:true});
+});
 
 rulesButton.addEventListener("click",function(){
   rulesOverlay.classList.remove("hidden");
