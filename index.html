@@ -942,47 +942,86 @@ function botTurn(){
 
   const level=Math.max(1,Math.min(10,Number(game.botDifficulty)||5));
 
-  // Higher level = fewer misses and a better chance to choose a useful throw.
-  const missChance=0.38-(level-1)*0.032;
-  const exactChance=0.25+(level-1)*0.055;
+  // Realistische worpverdeling per niveau.
+  // Iedere pijl wordt afzonderlijk bepaald, zodat ook combinaties
+  // zoals MISS-MISS-Single of Single-Double-MISS kunnen ontstaan.
+  function botThrowValue(){
+    const roll=Math.random();
 
-  if(Math.random()<missChance){
-    value=0;
-  }else if(!bot.killer){
-    const needed=5-bot.counter;
+    // Kansverdeling: MISS / SINGLE / DOUBLE / TRIPLE.
+    // Lage niveaus missen vaak en gooien vooral Singles.
+    // Hogere niveaus missen minder en gooien vaker Doubles/Triples.
+    const miss = [
+      0.42, // 1
+      0.34, // 2
+      0.27, // 3
+      0.21, // 4
+      0.16, // 5
+      0.12, // 6
+      0.09, // 7
+      0.07, // 8
+      0.05, // 9
+      0.035 // 10
+    ][level-1];
 
-    if(needed>=1&&needed<=3&&Math.random()<exactChance){
-      value=needed;
-    }else{
-      value=1+Math.floor(Math.random()*3);
-    }
+    const triple = [
+      0.025, // 1
+      0.035, // 2
+      0.055, // 3
+      0.08,  // 4
+      0.11,  // 5
+      0.15,  // 6
+      0.19,  // 7
+      0.23,  // 8
+      0.27,  // 9
+      0.31   // 10
+    ][level-1];
 
+    const dbl = [
+      0.07,  // 1
+      0.10,  // 2
+      0.14,  // 3
+      0.18,  // 4
+      0.22,  // 5
+      0.26,  // 6
+      0.29,  // 7
+      0.31,  // 8
+      0.33,  // 9
+      0.34   // 10
+    ][level-1];
+
+    if(roll<miss) return 0;
+    if(roll<miss+dbl) return 2;
+    if(roll<miss+dbl+triple) return 3;
+    return 1;
+  }
+
+  if(!bot.killer){
+    // Tijdens het Killer worden probeert de BOT niet kunstmatig
+    // precies 5/5 te raken. Zijn normale worpverdeling bepaalt het.
     targetIndex=game.current;
+    value=botThrowValue();
   }else{
     const humanIndex=game.players.findIndex(p=>!p.bot);
     targetIndex=humanIndex;
 
+    // Ook tijdens aanvallen blijft de worpverdeling realistisch.
+    // Hogere niveaus krijgen alleen een beperkte extra kans om
+    // een geschikte Double te gooien wanneer dat logisch is.
     const target=game.players[targetIndex];
 
     if(target.killer){
-      // Higher levels are better at choosing damage that can finish exactly.
-      if(target.lives===1){
-        value=(level>=7&&Math.random()<0.75)?1:(Math.random()<0.5?1:2);
-      }else if(target.lives===2){
-        value=(level>=6&&Math.random()<0.65)?2:(Math.random()<0.5?1:2);
+      const canFinish=target.lives>=1 && target.lives<=3;
+
+      if(canFinish && level>=6 && Math.random() < (level-5)*0.07){
+        // Op hogere niveaus iets beter in het herkennen van een
+        // mogelijke finish, maar nog steeds niet gegarandeerd.
+        value=target.lives===1 ? 1 : 2;
       }else{
-        value=(level>=7&&Math.random()<0.55)?2:1;
+        value=botThrowValue();
       }
     }else{
-      if(target.counter>=3&&Math.random()<(0.25+level*0.055)){
-        value=3;
-      }else if(target.counter===1&&level>=7&&Math.random()<0.5){
-        value=1;
-      }else if(target.counter===2&&level>=6&&Math.random()<0.5){
-        value=2;
-      }else{
-        value=1+Math.floor(Math.random()*3);
-      }
+      value=botThrowValue();
     }
   }
 
