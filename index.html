@@ -388,25 +388,6 @@ const namesTrack=document.getElementById("namesTrack");
 const bullList=document.getElementById("bullList");
 const appBanner=document.querySelector(".appBanner");
 
-let audioUnlocked=false;
-function unlockSounds(){
-  if(audioUnlocked)return;
-  [gameOnSound,killerSound,winnerSound].forEach(audio=>{
-    if(!audio)return;
-    try{
-      audio.muted=true;
-      audio.currentTime=0;
-      const p=audio.play();
-      if(p&&p.then){
-        p.then(()=>{audio.pause();audio.currentTime=0;audio.muted=false;})
-         .catch(()=>{audio.muted=false;});
-      }else{
-        audio.pause();audio.currentTime=0;audio.muted=false;
-      }
-    }catch(e){try{audio.muted=false;}catch(_){}}
-  });
-  audioUnlocked=true;
-}
 function playSound(audio){
   if(!audio)return;
   try{
@@ -416,9 +397,7 @@ function playSound(audio){
     const promise=audio.play();
     if(promise&&promise.catch)promise.catch(()=>{});
   }catch(e){}
-}
-
-rulesButton.addEventListener("click",function(){
+}rulesButton.addEventListener("click",function(){
   rulesOverlay.classList.remove("hidden");
 });
 rulesClose.addEventListener("click",function(){
@@ -482,16 +461,14 @@ function randomFreeNumber(used){
   return free[Math.floor(Math.random()*free.length)];
 }
 
-startButton.addEventListener("click",function(){unlockSounds();startGame();});
+startButton.addEventListener("click",function(){startGame();});
 
 tossButton.addEventListener("click",function(){
-  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   runNameRoll();
 });
 
 bullButton.addEventListener("click",function(){
-  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   showBullChoice();
 });
