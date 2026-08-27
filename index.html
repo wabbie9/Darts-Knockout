@@ -388,6 +388,30 @@ const namesTrack=document.getElementById("namesTrack");
 const bullList=document.getElementById("bullList");
 const appBanner=document.querySelector(".appBanner");
 
+let audioUnlocked=false;
+function unlockSounds(){
+  if(audioUnlocked)return;
+  // Unlock only the Game On audio element, silently, from a real user action.
+  // Never preload/play Killer or Winner here and never make any sound audible.
+  if(!gameOnSound)return;
+  try{
+    gameOnSound.muted=true;
+    gameOnSound.currentTime=0;
+    const p=gameOnSound.play();
+    if(p&&p.then){
+      p.then(()=>{
+        gameOnSound.pause();
+        gameOnSound.currentTime=0;
+        gameOnSound.muted=false;
+      }).catch(()=>{gameOnSound.muted=false;});
+    }else{
+      gameOnSound.pause();
+      gameOnSound.currentTime=0;
+      gameOnSound.muted=false;
+    }
+  }catch(e){try{gameOnSound.muted=false;}catch(_){} }
+  audioUnlocked=true;
+}
 function playSound(audio){
   if(!audio)return;
   try{
@@ -397,7 +421,9 @@ function playSound(audio){
     const promise=audio.play();
     if(promise&&promise.catch)promise.catch(()=>{});
   }catch(e){}
-}rulesButton.addEventListener("click",function(){
+}
+
+rulesButton.addEventListener("click",function(){
   rulesOverlay.classList.remove("hidden");
 });
 rulesClose.addEventListener("click",function(){
@@ -461,14 +487,16 @@ function randomFreeNumber(used){
   return free[Math.floor(Math.random()*free.length)];
 }
 
-startButton.addEventListener("click",function(){startGame();});
+startButton.addEventListener("click",function(){unlockSounds();startGame();});
 
 tossButton.addEventListener("click",function(){
+  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   runNameRoll();
 });
 
 bullButton.addEventListener("click",function(){
+  unlockSounds();
   starterChoiceOverlay.classList.add("hidden");
   showBullChoice();
 });
@@ -494,6 +522,8 @@ function startGame(){
   const numbers=players.map(p=>p.number);
   if(new Set(numbers).size!==numbers.length){alert("Iedere speler moet een verschillend nummer hebben.");return;}
   game={players:players,current:0,dart:0,finished:false,botMode:selected==="bot",botDifficulty:selected==="bot"?Number(difficulty.value):5,coinFlipDone:false,lastDarts:[]};
+  game.restartPlayers=players.map(p=>({name:p.name,number:p.number,bot:p.bot}));
+  game.restartStarter=0;
 
   // BOT: altijd direct de namenrol. Bullen bestaat niet tegen de BOT.
   if(selected==="bot"){
@@ -507,6 +537,7 @@ function startGame(){
 
 function prepareGameScreen(firstPlayerIndex){
   if(appBanner) appBanner.style.display="none";
+  game.restartStarter=firstPlayerIndex;
   game.current=firstPlayerIndex;
   game.players[firstPlayerIndex].turns=1;
   game.coinFlipDone=true;
@@ -1010,7 +1041,31 @@ function botTurn(){
 }
 
 newGame.addEventListener("click",function(){
-  location.reload();
+  if(!game||!game.restartPlayers)return;
+
+  // Restart the exact same match: same players/numbers/BOT, same starter,
+  // but all counters and in-game progress return to their starting values.
+  game.players=game.restartPlayers.map(p=>({
+    name:p.name,
+    number:p.number,
+    counter:0,
+    killer:false,
+    lives:3,
+    darts:[],
+    turns:0,
+    bot:p.bot
+  }));
+  game.current=game.restartStarter||0;
+  game.dart=0;
+  game.finished=false;
+  game.coinFlipDone=true;
+  game.lastDarts=[];
+
+  winBox.classList.add("hidden");
+  throwCard.classList.remove("hidden");
+  gameScreen.classList.remove("hidden");
+  setup.classList.add("hidden");
+  prepareGameScreen(game.current);
 });
 
 mainMenu.addEventListener("click",function(){
